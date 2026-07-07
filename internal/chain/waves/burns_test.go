@@ -24,16 +24,16 @@ func burnFixtureTxs(t *testing.T) []json.RawMessage {
 
 func TestDetectBurnsFiltersWindowAssetAndRecipient(t *testing.T) {
 	window := chain.Window{Start: 4000000, End: 4001000}
-	const maxConfirmedHeight = 4000100 // tip minus confirmations: Unconfirmed77 at 4000900 must wait
 
-	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, window, maxConfirmedHeight)
+	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, window)
 	require.NoError(t, err)
 
 	byID := map[string]chain.Burn{}
 	for _, b := range burns {
 		byID[b.TxID] = b
 	}
-	require.Len(t, burns, 3, "plain, partial and mass-transfer burns only")
+	require.Len(t, burns, 4, "plain, partial, mass-transfer and not-yet-mature burns")
+	assert.Equal(t, uint64(4000900), byID["Unconfirmed77"].Height, "fresh burns are detected; maturity is the watcher's call")
 
 	assert.Equal(t, uint64(100000000), byID["BurnPlain111"].Amount)
 	assert.Equal(t, "3PSenderAlice1111111111111111111111", byID["BurnPlain111"].Source)
@@ -46,13 +46,13 @@ func TestDetectBurnsFiltersWindowAssetAndRecipient(t *testing.T) {
 		"mass transfer sums only the entries to the burn address")
 	assert.Equal(t, "3PSenderCarol333333333333333333333", byID["BurnMass3333"].Source)
 
-	for _, absent := range []string{"NotWavesAsset", "OtherRecipien", "BeforeWindow1", "Unconfirmed77", "InvokeIgnored"} {
+	for _, absent := range []string{"NotWavesAsset", "OtherRecipien", "BeforeWindow1", "InvokeIgnored"} {
 		assert.NotContains(t, byID, absent)
 	}
 }
 
 func TestDetectBurnsKeepsRawJSONVerbatim(t *testing.T) {
-	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, chain.Window{Start: 4000000, End: 4001000}, 4000100)
+	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, chain.Window{Start: 4000000, End: 4001000})
 	require.NoError(t, err)
 	require.NotEmpty(t, burns)
 

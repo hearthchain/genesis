@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"path/filepath"
 
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
@@ -20,16 +21,19 @@ import (
 	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/credit"
+	"github.com/hearthchain/burning-page/internal/evidence"
 	"github.com/hearthchain/burning-page/internal/hearthaddr"
 	"github.com/hearthchain/burning-page/internal/journal"
 	"github.com/hearthchain/burning-page/internal/layers"
 	"github.com/hearthchain/burning-page/internal/snapshot"
+	"github.com/hearthchain/burning-page/internal/store"
 )
 
 const (
 	maxPreviewConcurrency = 4 // preview is the only endpoint spending public-node quota
 	maxBindingBodyBytes   = 4 << 10
 	microPerCredit        = 1_000_000
+	creditBase            = 10
 )
 
 // Node is the read surface the preview endpoint needs.
@@ -137,13 +141,18 @@ func (s *Server) address(w http.ResponseWriter, r *http.Request) {
 		if b.Hearth != hearth {
 			continue
 		}
-		burns = append(burns, b)
-		const base = 10
-		c, ok := new(big.Int).SetString(b.CreditMicro, base)
+		burns = append(burns, confirmedBurnView{Bundle: b, Status: "confirmed"})
+		c, ok := new(big.Int).SetString(b.CreditMicro, creditBase)
 		if ok {
 			total.Add(total, c)
 		}
 	}
+	pending, pErr := s.pendingBurns(hearth)
+	if pErr != nil {
+		writeError(w, http.StatusInternalServerError, "artifacts_error", pErr.Error())
+		return
+	}
+	burns = append(burns, pending...)
 	sources := s.registry.SourcesFor(hearth)
 	if sources == nil {
 		sources = []string{}
@@ -170,6 +179,48 @@ func (s *Server) postBinding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusCreated, map[string]any{"accepted": true})
+}
+
+// confirmedBurnView decorates an evidence bundle with its lifecycle status.
+type confirmedBurnView struct {
+	evidence.Bundle
+	Status string `json:"status"`
+}
+
+// pendingBurnView is a burn that is visible but not yet credited: detected on
+// chain, waiting for confirmation depth or for the cross-check.
+type pendingBurnView struct {
+	TxID           string `json:"txId"`
+	Chain          string `json:"chain"`
+	Source         string `json:"source"`
+	AmountWavelets uint64 `json:"amountWavelets"`
+	Height         uint64 `json:"height"`
+	Status         string `json:"status"`
+}
+
+// pendingBurns lists the not-yet-confirmed burns whose source is bound to the
+// hearth address. The JSONL schema of burns.jsonl is the contract here.
+func (s *Server) pendingBurns(hearth string) ([]any, error) {
+	rows, err := store.ReadJSONL[pendingBurnView](filepath.Join(s.cfg.DataDir, "burns.jsonl"))
+	if err != nil {
+		return nil, err
+	}
+	latest := make(map[string]pendingBurnView, len(rows))
+	for _, r := range rows {
+		latest[r.TxID] = r
+	}
+	var out []any
+	for _, r := range latest {
+		if r.Status == "confirmed" {
+			continue
+		}
+		bound, ok := s.registry.HearthFor(r.Source)
+		if !ok || bound != hearth {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out, nil
 }
 
 func writeBindingError(w http.ResponseWriter, err error) {

@@ -29,7 +29,7 @@ func secondaryNode(t *testing.T, height uint64, txJSON string) *waves.Client {
 
 func fixtureBurn(t *testing.T) (chain.Burn, string) {
 	t.Helper()
-	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, chain.Window{Start: 4000000, End: 4001000}, 4000100)
+	burns, err := waves.DetectBurns(burnFixtureTxs(t), burnAddr, chain.Window{Start: 4000000, End: 4001000})
 	require.NoError(t, err)
 	require.NotEmpty(t, burns)
 	return burns[0], string(burns[0].Raw)

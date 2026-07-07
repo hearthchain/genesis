@@ -61,7 +61,7 @@ func (w *Watcher) Poll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	burns, err := waves.DetectBurns(txs, w.Cfg.BurnAddress, w.Cfg.Window, tip-w.Cfg.Confirmations)
+	burns, err := waves.DetectBurns(txs, w.Cfg.BurnAddress, w.Cfg.Window)
 	if err != nil {
 		return err
 	}
@@ -93,14 +93,25 @@ func (w *Watcher) latestRecords() (map[string]BurnRecord, error) {
 
 func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[string]BurnRecord, tip uint64) error {
 	prev, seen := latest[b.TxID]
-	if seen && prev.Status != "pending_crosscheck" {
+	if seen && (prev.Status == "confirmed" || prev.Status == "mismatch") {
+		return nil
+	}
+	if b.Height+w.Cfg.Confirmations > tip {
+		if seen {
+			return nil // already visible as pending; nothing changed
+		}
+		rec := BurnRecord{Burn: b, Status: "pending_confirmations", DetectedAt: time.Now().UTC()}
+		if aErr := store.AppendJSONL(w.burnsPath(), rec); aErr != nil {
+			return aErr
+		}
+		slog.Info("burn recorded", "txId", b.TxID, "source", b.Source, "amount", b.Amount, "status", rec.Status)
 		return nil
 	}
 	verdict, err := waves.CrossCheck(ctx, w.Secondary, b, w.Cfg.Confirmations)
 	if err != nil {
 		return err
 	}
-	if seen && verdict.Status == "pending_crosscheck" {
+	if seen && verdict.Status == prev.Status {
 		return nil // still waiting; no need to grow the artifact
 	}
 	rec := BurnRecord{Burn: b, Status: verdict.Status, CrossCheck: verdict, DetectedAt: time.Now().UTC()}

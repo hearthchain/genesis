@@ -34,12 +34,13 @@ type burnTx struct {
 	} `json:"transfers"`
 }
 
-// DetectBurns filters an address history down to the confirmed burns inside
-// the window: WAVES transfers (plain or mass) to the burn address with height
-// in [window.Start, min(window.End, maxConfirmedHeight)]. Attachments are
-// tolerated; the funds are destroyed regardless of any extra data.
-func DetectBurns(txs []json.RawMessage, burnAddr string, window chain.Window, maxConfirmedHeight uint64) ([]chain.Burn, error) {
-	maxHeight := min(window.End, maxConfirmedHeight)
+// DetectBurns filters an address history down to the burns inside the window:
+// WAVES transfers (plain or mass) to the burn address with height in
+// [window.Start, window.End]. Maturity (confirmation depth) is the watcher's
+// call, not the detector's: fresh burns surface immediately as pending.
+// Attachments are tolerated; the funds are destroyed regardless of extra data.
+func DetectBurns(txs []json.RawMessage, burnAddr string, window chain.Window) ([]chain.Burn, error) {
+	maxHeight := window.End
 	var burns []chain.Burn
 	for _, raw := range txs {
 		var tx burnTx

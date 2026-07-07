@@ -64,9 +64,12 @@ func depositTx(recipient string, amount uint64, heightTS string) json.RawMessage
 		`,"height":` + parts[0] + `}`)
 }
 
+var serverDataDir string
+
 func newServer(t *testing.T, id identity) *httptest.Server {
 	t.Helper()
 	dataDir := t.TempDir()
+	serverDataDir = dataDir
 
 	// One confirmed burn from id.source with a verified transfer history.
 	burnTx := `{"type":4,"id":"B1","sender":"` + id.source + `","recipient":"3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1","assetId":null,"amount":100000000000,"fee":100000,"feeAssetId":null,"timestamp":1754049600000,"height":4000010}`
@@ -219,4 +222,33 @@ func TestKeeperFormatBindingAccepted(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = resp2.Body.Close() })
 	assert.Equal(t, http.StatusUnauthorized, resp2.StatusCode)
+}
+
+func TestAddressShowsPendingBurnsWithoutCredit(t *testing.T) {
+	id := newIdentity(t, "api test burner")
+	srv := newServer(t, id)
+	require.Equal(t, http.StatusCreated, postBinding(t, srv.URL, id, id.sig).StatusCode)
+
+	// A fresh burn recorded by the watcher before maturity.
+	require.NoError(t, store.AppendJSONL(filepath.Join(serverDataDir, "burns.jsonl"), map[string]any{
+		"txId": "Fresh1", "chain": "waves", "source": id.source, "amountWavelets": 10000000,
+		"height": 4000900, "timestamp": "2026-08-01T13:00:00Z", "status": "pending_confirmations",
+	}))
+
+	got := getJSON(t, srv.URL+"/api/address/"+id.hearth)
+	assert.Equal(t, "49713174000", got["totalCreditMicro"], "pending burns do not add credit")
+
+	burns, ok := got["burns"].([]any)
+	require.True(t, ok)
+	require.Len(t, burns, 2, "confirmed and pending burns are both visible")
+	statuses := map[string]string{}
+	for _, raw := range burns {
+		b, isMap := raw.(map[string]any)
+		require.True(t, isMap)
+		txID, _ := b["txId"].(string)
+		status, _ := b["status"].(string)
+		statuses[txID] = status
+	}
+	assert.Equal(t, "confirmed", statuses["B1"])
+	assert.Equal(t, "pending_confirmations", statuses["Fresh1"])
 }

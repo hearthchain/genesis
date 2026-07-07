@@ -64,16 +64,18 @@ func testNode(t *testing.T) *fakeNode {
 	carolDeposit := tx(`{"type":4,"id":"CarolDeposit1","sender":"3POther","recipient":"` + carol + `","assetId":null,"amount":900000000,"fee":100000,"feeAssetId":null,"timestamp":1753900000000,"height":4000002}`)
 	carolLease := tx(`{"type":8,"id":"CarolLease111","sender":"` + carol + `","recipient":"3POther","amount":100,"fee":100000,"timestamp":1753900001000,"height":4000003}`)
 	carolBurn := tx(`{"type":4,"id":"CarolBurn1111","sender":"` + carol + `","recipient":"` + burnAddr + `","assetId":null,"amount":50000000,"fee":100000,"feeAssetId":null,"timestamp":1754006401000,"height":4000011,"applicationStatus":"succeeded"}`)
+	freshBurn := tx(`{"type":4,"id":"FreshBurn9999","sender":"` + alice + `","recipient":"` + burnAddr + `","assetId":null,"amount":10000000,"fee":100000,"feeAssetId":null,"timestamp":1754010000000,"height":4000150,"applicationStatus":"succeeded"}`)
 
 	return &fakeNode{
 		histories: map[string][]json.RawMessage{
-			burnAddr: {aliceBurn, carolBurn},
+			burnAddr: {aliceBurn, carolBurn, freshBurn},
 			alice:    {aliceBurn, aliceDeposit},
 			carol:    {carolBurn, carolLease, carolDeposit},
 		},
 		byID: map[string]json.RawMessage{
 			"AliceBurn1111": aliceBurn,
 			"CarolBurn1111": carolBurn,
+			"FreshBurn9999": freshBurn,
 		},
 		tip: 4000200,
 		balances: map[string]uint64{
@@ -105,7 +107,7 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 
 	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
 	require.NoError(t, err)
-	require.Len(t, records, 2)
+	require.Len(t, records, 3)
 	byID := map[string]watcher.BurnRecord{}
 	for _, r := range records {
 		byID[r.TxID] = r
@@ -113,6 +115,8 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 	assert.Equal(t, "confirmed", byID["AliceBurn1111"].Status)
 	assert.Equal(t, uint64(100000000), byID["AliceBurn1111"].Amount)
 	assert.Equal(t, "confirmed", byID["CarolBurn1111"].Status)
+	assert.Equal(t, "pending_confirmations", byID["FreshBurn9999"].Status,
+		"a fresh burn is visible immediately, credit waits for maturity")
 
 	aliceMeta, _, err := store.ReadTransfers(filepath.Join(cfg.DataDir, "transfers", alice+".jsonl"))
 	require.NoError(t, err)
@@ -139,9 +143,27 @@ func TestPollIsIdempotentAcrossRestarts(t *testing.T) {
 
 	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
 	require.NoError(t, err)
-	assert.Len(t, records, 2, "rescan must skip already-final records")
+	assert.Len(t, records, 3, "rescan must skip already-recorded states")
 
 	entries, err := os.ReadDir(filepath.Join(cfg.DataDir, "transfers"))
 	require.NoError(t, err)
 	assert.Len(t, entries, 2)
+}
+
+func TestPendingBurnUpgradesWhenMature(t *testing.T) {
+	node := testNode(t)
+	cfg := testConfig(t)
+	w := &watcher.Watcher{Primary: node, Secondary: node, Cfg: cfg}
+	require.NoError(t, w.Poll(t.Context()))
+
+	node.tip = 4000300 // FreshBurn9999 at 4000150 now has >100 confirmations
+	require.NoError(t, w.Poll(t.Context()))
+
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	require.NoError(t, err)
+	latest := map[string]string{}
+	for _, r := range records {
+		latest[r.TxID] = r.Status
+	}
+	assert.Equal(t, "confirmed", latest["FreshBurn9999"], "the superseding record wins")
 }
