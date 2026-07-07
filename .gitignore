@@ -1,0 +1,14 @@
+# binaries and build artifacts
+bin/
+dist/
+*.exe
+
+# local state
+*.db
+*.sqlite
+.env
+
+# editor
+.idea/
+.vscode/
+.DS_Store
