@@ -70,9 +70,15 @@ async function init() {
   }
 }
 
+const HEARTH_SHAPE = /^[1-9A-HJ-NP-Za-km-z]{30,40}$/; // base58, address-sized; the server still verifies the checksum
+
 async function sign() {
   const hearth = el("hearth").value.trim();
   if (!hearth) { show("err", "Enter the Hearth address first."); return; }
+  if (!HEARTH_SHAPE.test(hearth)) {
+    show("err", "This does not look like a Hearth address (base58, ~35 characters, starts with 3H). Nothing was signed.");
+    return;
+  }
   const message = MESSAGE_PREFIX + source + ":" + hearth;
   const b64 = btoa(String.fromCharCode(...new TextEncoder().encode(message)));
   try {
