@@ -21,6 +21,7 @@ func TestLoadExampleConfig(t *testing.T) {
 	assert.Equal(t, "data/journal/waves.csv", cfg.JournalCSV)
 	assert.Equal(t, ":8080", cfg.ListenAddr)
 	assert.Equal(t, byte('H'), cfg.HearthSchemeByte())
+	assert.Equal(t, []string{"https://genesis.hearth.tech"}, cfg.AllowedOrigins)
 }
 
 func TestLoadRejectsMissingFileAndBadScheme(t *testing.T) {
