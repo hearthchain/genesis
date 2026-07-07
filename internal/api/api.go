@@ -74,7 +74,7 @@ func (s *Server) Handler() http.Handler {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write(bindPage)
 	})
-	return mux
+	return withCORS(s.cfg.AllowedOrigins, mux)
 }
 
 func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
