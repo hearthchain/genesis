@@ -45,10 +45,17 @@
       <p class="label">The Waves burn address</p>
       <p class="addr" id="burn-address" style="font-size: 1.05rem; margin: 14px 0 0;">3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1</p>
       <p style="margin: 18px 0 0;"><button class="btn btn-gray" id="copy-address" type="button">Copy address</button> <span class="micro" id="copy-done" hidden>copied</span></p>
+      <div class="form-row" style="margin-top: 22px;">
+        <input id="burn-amount" placeholder="Amount, WAVES" autocomplete="off" spellcheck="false" inputmode="decimal">
+        <button class="btn btn-primary" id="burn-keeper" type="button" disabled>Burn in Keeper</button>
+      </div>
+      <div class="result" id="burn-result" hidden style="margin-top: 18px; text-align: left;"></div>
+      <p class="micro" style="margin: 14px 0 0;">Keeper shows the exact amount and address before you approve. The transfer is irreversible.</p>
     </div>
     <ul class="list" style="max-width: 640px; margin: 30px auto 0;">
       <li><span class="dash">–</span><span>Any amount, in one or several transactions, any time before the window closes.</span></li>
       <li><span class="dash">–</span><span>Burn and bind in any order; the credit follows the sending address.</span></li>
+      <li><span class="dash">–</span><span>No Hearth address yet? Burn now, bind later: unbound burns wait in the journal and credit as soon as your binding arrives.</span></li>
     </ul>
     <p class="micro" style="max-width: 640px; margin: 20px auto 0; text-align: center;">The Xs are not a placeholder: the address is valid base58 with a correct checksum and provably no key; what arrives there can never move.</p>
     <div class="notice" style="margin: 30px auto 0; max-width: 640px; padding: 18px 22px;">

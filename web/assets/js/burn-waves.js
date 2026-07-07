@@ -1,7 +1,7 @@
 "use strict";
 // The Waves lane: credit preview by source address, copy-the-burn-address,
-// and the Keeper binding flow (same statement and envelope as the embedded
-// /bind page, but against the configured API base).
+// one-click burn via Keeper, and the Keeper binding flow (same statement and
+// envelope as the embedded /bind page, but against the configured API base).
 (function () {
   const { apiGet, apiPost, fmtWaves, fmtUnits, fmtMicroUsd, errorMessage } = window.HearthAPI;
   const el = (id) => document.getElementById(id);
@@ -115,10 +115,49 @@
       if (!source) throw new Error("no active account in Keeper");
       el("bind-source").textContent = source;
       el("bind-sign").disabled = false;
+      el("burn-keeper").disabled = false;
     } catch (e) {
       el("bind-source").textContent = "Keeper refused access: " + (e && e.message ? e.message : e);
     }
   }
+
+  // --- burn via Keeper: a plain type-4 transfer signed and published by the
+  // extension, so the address is never copied by hand ---
+
+  const AMOUNT_SHAPE = /^\d+(\.\d{1,8})?$/; // WAVES has 8 decimals
+
+  function showBurn(kind, text) {
+    const r = el("burn-result");
+    r.hidden = false;
+    r.className = "result " + kind;
+    r.textContent = text;
+  }
+
+  el("burn-keeper").addEventListener("click", async () => {
+    const amount = el("burn-amount").value.trim();
+    if (!AMOUNT_SHAPE.test(amount) || !/[1-9]/.test(amount)) {
+      showBurn("err", "Enter the amount in WAVES, e.g. 10 or 0.5. Nothing was sent.");
+      return;
+    }
+    el("burn-keeper").disabled = true;
+    try {
+      const published = await window.KeeperWallet.signAndPublishTransaction({
+        type: 4,
+        data: {
+          recipient: el("burn-address").textContent.trim(),
+          amount: { assetId: "WAVES", tokens: amount },
+          fee: { assetId: "WAVES", tokens: "0.001" },
+        },
+      });
+      let txId = "";
+      try { txId = JSON.parse(published).id || ""; } catch { /* Keeper answered non-JSON: the link below is just skipped */ }
+      showBurn("ok", "Burned " + amount + " WAVES." + (txId ? "\nTransaction: " + txId : "") + "\nIt shows in your cabinet within minutes and is credited once confirmed on two independent nodes.");
+    } catch (e) {
+      showBurn("err", "Keeper did not publish the transfer: " + (e && e.message ? e.message : e));
+    } finally {
+      el("burn-keeper").disabled = false;
+    }
+  });
 
   el("bind-sign").addEventListener("click", async () => {
     const hearth = el("bind-hearth").value.trim();
