@@ -33,11 +33,56 @@
 
 <main>
 
-<!-- 1 · PREVIEW -->
+<!-- BURN -->
 <section>
   <div class="container section-pad">
     <div class="sec-head">
-      <p class="label">Burn Waves · step 1</p>
+      <p class="label">Burn Waves</p>
+      <h2 class="h2">One plain transfer. Nothing else.</h2>
+      <p class="sec-intro">Send WAVES to this address from your own wallet, never from an exchange. Then sign below where your HRTH credit goes. That is all.</p>
+    </div>
+    <div class="card" style="max-width: 640px; margin: 40px auto 0; text-align: center;">
+      <p class="label">The Waves burn address</p>
+      <p class="addr" id="burn-address" style="font-size: 1.05rem; margin: 14px 0 0;">3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1</p>
+      <p style="margin: 18px 0 0;"><button class="btn btn-gray" id="copy-address" type="button">Copy address</button> <span class="micro" id="copy-done" hidden>copied</span></p>
+    </div>
+    <ul class="list" style="max-width: 640px; margin: 30px auto 0;">
+      <li><span class="dash">–</span><span>Any amount, in one or several transactions, any time before the window closes.</span></li>
+      <li><span class="dash">–</span><span>Burn and bind in any order; the credit follows the sending address.</span></li>
+    </ul>
+    <p class="micro" style="max-width: 640px; margin: 20px auto 0; text-align: center;">The Xs are not a placeholder: the address is valid base58 with a correct checksum and provably no key; what arrives there can never move.</p>
+    <div class="notice" style="margin: 30px auto 0; max-width: 640px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Never burn straight from an exchange.</strong> Withdraw to your own address first, then burn. Exchange addresses are blacklisted, exchange custody breaks the continuous holding period your credit is priced from, and a withdrawal sent directly to a burn address credits nobody.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BIND -->
+<section id="bind" style="background: var(--panel);">
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Bind</p>
+      <h2 class="h2">Bind the source to your Hearth address.</h2>
+      <p class="sec-intro">Keeper Wallet signs one short statement with the key of your burning address, routing every burn from it to your Hearth cabinet. Your seed phrase never leaves the extension, and you can bind before or after burning, in any order.</p>
+    </div>
+    <div class="card" style="max-width: 640px; margin: 40px auto 0;">
+      <p style="margin: 0; font-size: .92rem;">Waves account (active in Keeper): <span class="addr" id="bind-source">detecting Keeper…</span></p>
+      <div class="form-row">
+        <input id="bind-hearth" placeholder="Hearth address to receive the credit, 3H..." autocomplete="off" spellcheck="false">
+      </div>
+      <p style="margin: 18px 0 0;"><button class="btn btn-primary" id="bind-sign" type="button" disabled>Sign binding in Keeper</button></p>
+      <div class="result" id="bind-result" hidden style="margin-top: 18px;"></div>
+      <p class="micro" id="bind-cabinet" style="margin-top: 14px;"></p>
+    </div>
+    <p class="micro" style="max-width: 640px; margin: 24px auto 0; text-align: center;">No Keeper? Sign the same statement offline with the open-source <span class="addr">bindsign</span> CLI from the <a href="https://github.com/hearthchain/burning-page">repository</a> and submit it from any machine. The statement is <span class="addr">hearth-genesis-binding:v1:&lt;source&gt;:&lt;hearth&gt;</span>; only the latest binding per source counts at snapshot freeze.</p>
+  </div>
+</section>
+
+<!-- OPTIONAL PREVIEW -->
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Optional</p>
       <h2 class="h2">Preview what your history is worth.</h2>
       <p class="sec-intro">Paste the Waves address you would burn from. This is a public read: no wallet, no signature. The backend rebuilds your minimum-balance layers from transfer history and prices each at its best week.</p>
     </div>
@@ -51,7 +96,7 @@
         <div class="glance-item">
           <p class="label" style="font-size: .66rem;">Minimum credit if fully burned</p>
           <p class="stat" id="preview-credit">·</p>
-          <p class="stat-sub">in HRTH; a floor, the weekly maximum can only grow until the snapshot freezes</p>
+          <p class="stat-sub">Until the snapshot freezes, the figure is a minimum: the best-week price can only grow.</p>
         </div>
         <div class="glance-item">
           <p class="label" style="font-size: .66rem;">Address</p>
@@ -69,52 +114,6 @@
         </table>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- 2 · BURN -->
-<section style="background: var(--panel);">
-  <div class="container section-pad">
-    <div class="sec-head">
-      <p class="label">Burn Waves · step 2</p>
-      <h2 class="h2">One plain transfer. Nothing else.</h2>
-      <p class="sec-intro">Send WAVES from the address you previewed to the burn address below: no attachment, no memo, any amount, any wallet. The address is a provably unspendable vanity address; nobody, including us, can ever move what arrives there.</p>
-    </div>
-    <div class="card" style="max-width: 640px; margin: 40px auto 0; text-align: center;">
-      <p class="label">The Waves burn address</p>
-      <p class="addr" id="burn-address" style="font-size: 1.05rem; margin: 14px 0 0;">3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1</p>
-      <p style="margin: 18px 0 0;"><button class="btn btn-gray" id="copy-address" type="button">Copy address</button> <span class="micro" id="copy-done" hidden>copied</span></p>
-    </div>
-    <ul class="list" style="max-width: 640px; margin: 30px auto 0;">
-      <li><span class="dash">–</span><span>Send from the address you will bind in step 3: the credit follows the sending address.</span></li>
-      <li><span class="dash">–</span><span>A plain transfer is enough. Attachments are ignored; there is no code word and no payload format.</span></li>
-      <li><span class="dash">–</span><span>Burn in one or several transactions, any time before the window closes; layers are consumed oldest first.</span></li>
-      <li><span class="dash">–</span><span>The burn shows in your cabinet within minutes and is credited after confirmation depth on two independent nodes.</span></li>
-    </ul>
-    <div class="notice" style="margin: 30px auto 0; max-width: 640px; padding: 18px 22px;">
-      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Never burn straight from an exchange.</strong> Withdraw to your own address first, then burn. Exchange addresses are blacklisted, exchange custody never earns the holding multiplier, and a withdrawal sent directly to a burn address credits nobody.</p>
-    </div>
-  </div>
-</section>
-
-<!-- 3 · BIND -->
-<section id="bind">
-  <div class="container section-pad">
-    <div class="sec-head">
-      <p class="label">Burn Waves · step 3</p>
-      <h2 class="h2">Bind the source to your Hearth address.</h2>
-      <p class="sec-intro">Keeper Wallet signs one short statement with the key of your burning address; that routes every burn from it to your Hearth cabinet. Your seed phrase never leaves the extension, and we will never ask for it. Bind before or after burning, in any order.</p>
-    </div>
-    <div class="card" style="max-width: 640px; margin: 40px auto 0;">
-      <p style="margin: 0; font-size: .92rem;">Waves account (active in Keeper): <span class="addr" id="bind-source">detecting Keeper…</span></p>
-      <div class="form-row">
-        <input id="bind-hearth" placeholder="Hearth address to receive the credit, 3H..." autocomplete="off" spellcheck="false">
-      </div>
-      <p style="margin: 18px 0 0;"><button class="btn btn-primary" id="bind-sign" type="button" disabled>Sign binding in Keeper</button></p>
-      <div class="result" id="bind-result" hidden style="margin-top: 18px;"></div>
-      <p class="micro" id="bind-cabinet" style="margin-top: 14px;"></p>
-    </div>
-    <p class="micro" style="max-width: 640px; margin: 24px auto 0; text-align: center;">No Keeper? Sign the same statement offline with the open-source <span class="addr">bindsign</span> CLI from the <a href="https://github.com/hearthchain/burning-page">repository</a> and submit it from any machine. The statement is <span class="addr">hearth-genesis-binding:v1:&lt;source&gt;:&lt;hearth&gt;</span>; only the latest binding per source counts at snapshot freeze.</p>
   </div>
 </section>
 

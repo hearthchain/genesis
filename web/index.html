@@ -36,21 +36,14 @@
 <!-- LIVE COUNTERS -->
 <section style="background: var(--panel);">
   <div class="container section-pad">
-    <div class="sec-head">
-      <p class="label">Genesis by fire</p>
-      <h2 class="h2">Burn a fallen chain. Light the new one.</h2>
-      <p class="sec-intro">Burn window: August–September 2026 (provisional) · Mainnet: October 2026. Every figure below refreshes from the public read API and is recomputable from chain data plus the published artifacts; the site is never authoritative.</p>
-    </div>
-    <div class="glance" style="margin-top: 44px;">
+    <div class="glance">
       <div class="glance-item">
-        <p class="label" style="font-size: .66rem;">Value burned, $ minimum</p>
+        <p class="label" style="font-size: .66rem;">Priced weight of burns, $</p>
         <p class="stat" id="stat-usd">·</p>
-        <p class="stat-sub">by the published max-week formula; grows until the snapshot freezes</p>
       </div>
       <div class="glance-item">
         <p class="label" style="font-size: .66rem;">HRTH at genesis, minimum</p>
         <p class="stat" id="stat-credit">·</p>
-        <p class="stat-sub">credit converts to HRTH one to one</p>
       </div>
       <div class="glance-item">
         <p class="label" style="font-size: .66rem;">WAVES burned</p>
@@ -60,7 +53,7 @@
       <div class="glance-item">
         <p class="label" style="font-size: .66rem;">Hearth addresses credited</p>
         <p class="stat" id="stat-participants">·</p>
-        <p class="stat-sub" id="stat-bindings-sub">the cabinet is the address, no accounts</p>
+        <p class="stat-sub" id="stat-bindings-sub"></p>
       </div>
     </div>
     <p class="micro" id="stat-root" style="margin-top: 28px; word-break: break-all;"></p>
@@ -76,7 +69,8 @@
     <div class="sec-head">
       <p class="label">Start a burn</p>
       <h2 class="h2">Which chain do you hold?</h2>
-      <p class="sec-intro">Ten networks that ranked among crypto's largest at their peak and never found their second act. Waves is live first; every other lane opens during the window, each with its exact target published on its page before it opens.</p>
+      <p class="sec-intro">Networks that ranked among crypto's largest at their peak and never found their second act. Waves is live first; other lanes open during the window, each with its target published before it opens.</p>
+      <p class="micro" style="margin-top: 14px;">Burn window: August–September 2026 (provisional, final dates announced on this page in advance). Mainnet: October 2026.</p>
     </div>
     <div class="grid cols-3">
       <a class="card" href="burn/waves/">
@@ -86,72 +80,23 @@
         <p class="body">Plain transfer to a provably unspendable address. Preview, burn, and bind today.</p>
         <span class="goto">burn/waves/ →</span>
       </a>
-      <a class="card" href="burn/eos/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">EOS / Vaulta</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">Burn mechanism finalized during design; published before the lane opens.</p>
-        <span class="goto">burn/eos/ →</span>
-      </a>
       <a class="card" href="burn/nem/">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
           <p class="label">NEM</p><span class="pill pill-line">Planned</span>
         </div>
-        <p class="body">Transfer to a provably unowned address.</p>
+        <p class="body">Transfer to a provably unowned address; opens later in the window.</p>
         <span class="goto">burn/nem/ →</span>
       </a>
-      <a class="card" href="burn/iota/">
+      <a class="card" href="https://hearth.tech/#waitlist">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">IOTA</p><span class="pill pill-line">Planned</span>
+          <p class="label">Your chain?</p><span class="pill pill-line">Vote</span>
         </div>
-        <p class="body">Burn mechanism finalized during design; published before the lane opens.</p>
-        <span class="goto">burn/iota/ →</span>
-      </a>
-      <a class="card" href="burn/neo/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">NEO</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">NEP-17 transfer to a burn address on N3.</p>
-        <span class="goto">burn/neo/ →</span>
-      </a>
-      <a class="card" href="burn/tezos/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">Tezos</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">Burn address or a minimal burn contract.</p>
-        <span class="goto">burn/tezos/ →</span>
-      </a>
-      <a class="card" href="burn/bsv/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">Bitcoin SV</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">Unspendable OP_FALSE OP_RETURN output.</p>
-        <span class="goto">burn/bsv/ →</span>
-      </a>
-      <a class="card" href="burn/lisk/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">Lisk</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">ERC-20 on an Ethereum L2, transfer to the dead address.</p>
-        <span class="goto">burn/lisk/ →</span>
-      </a>
-      <a class="card" href="burn/bitshares/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">BitShares</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">Native burn operation to the reserve pool.</p>
-        <span class="goto">burn/bitshares/ →</span>
-      </a>
-      <a class="card" href="burn/stratis/">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-          <p class="label">Stratis</p><span class="pill pill-line">Planned</span>
-        </div>
-        <p class="body">Transfer to the dead address on StratisEVM.</p>
-        <span class="goto">burn/stratis/ →</span>
+        <p class="body">Hold another fallen chain? Tell us which lane opens next.</p>
+        <span class="goto">hearth.tech →</span>
       </a>
     </div>
     <div class="notice" style="margin: 40px auto 0; max-width: 640px; padding: 18px 22px;">
-      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Never burn straight from an exchange.</strong> Withdraw to your own address first, then burn. Exchange addresses are blacklisted, exchange custody never earns the holding multiplier, and a withdrawal sent directly to a burn address credits nobody.</p>
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;">Never burn straight from an exchange; withdraw to your own address first.</p>
     </div>
   </div>
 </section>
@@ -197,7 +142,7 @@
       <p style="font-size: .92rem; line-height: 1.65; margin: 12px 0 0;">Credit = amount burned × the coin's highest weekly average price over the period you continuously held it, from a published CoinMarketCap-based price log. Your history is split into layers by minimum balance: each top-up starts a new layer with its own date, each sale shaves layers down. Held through the whole fall: credited near the top. Bought recently: credited at recent prices. 1 credit = 1 HRTH.</p>
       <p style="font-family: var(--mono); font-size: .8rem; line-height: 1.8; color: var(--muted); margin: 14px 0 0;">1,000 WAVES held since March 2022 → peak week $49.71 → 49,710 HRTH<br>the same 1,000 WAVES bought in early 2024 → $4.00 → 4,000 HRTH</p>
     </div>
-    <p style="text-align: center; font-size: .9rem; color: var(--muted); max-width: 640px; margin: 26px auto 0; line-height: 1.65;">Until the snapshot freezes, the figure in your cabinet is a minimum: the weekly maximum can only grow. The published rule is integer arithmetic with truncation, so anyone can recompute every credit to the last digit.</p>
+    <p style="text-align: center; font-size: .9rem; color: var(--muted); max-width: 640px; margin: 26px auto 0; line-height: 1.65;">Until the snapshot freezes, the figure is a minimum: the best-week price can only grow. The published rule is integer arithmetic with truncation, so anyone can recompute every credit to the last digit.</p>
   </div>
 </section>
 
