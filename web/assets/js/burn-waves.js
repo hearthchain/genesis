@@ -18,7 +18,7 @@
   function layerRow(layer) {
     const tr = document.createElement("tr");
     const cells = [
-      [layer.since, ""],
+      [String(layer.since).slice(0, 10), ""], // RFC3339 timestamp: keep the date
       [layer.weekEnd, ""],
       [fmtWaves(String(layer.amountWavelets)), "num"],
       [fmtMicroUsd(String(layer.priceMicroUsd)), "num"],
