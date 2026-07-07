@@ -47,7 +47,7 @@ func seedIdentity(t *testing.T, seed string) (source, hearth, pub, sig string) {
 
 // writeArtifacts lays down a minimal data dir: one bound burner (the spec
 // example: 1000 WAVES held since March 2022) and one unbound burner.
-func writeArtifacts(t *testing.T) (dataDir, hearth, boundSource, strangerSource string) {
+func writeArtifacts(t *testing.T) (dataDir, hearth, strangerSource string) {
 	t.Helper()
 	dataDir = t.TempDir()
 	source, h, pub, sig := seedIdentity(t, "snapshot bound burner")
@@ -79,11 +79,11 @@ func writeArtifacts(t *testing.T) (dataDir, hearth, boundSource, strangerSource 
 	require.NoError(t, err)
 	require.NoError(t, reg.Add(bindings.Record{Source: source, Chain: "waves", Hearth: h, PublicKey: pub, Signature: sig}))
 
-	return dataDir, h, source, stranger
+	return dataDir, h, stranger
 }
 
 func TestBuildAggregatesCreditsAndSeparatesPending(t *testing.T) {
-	dataDir, hearth, _, stranger := writeArtifacts(t)
+	dataDir, hearth, stranger := writeArtifacts(t)
 
 	snap, bundles, err := snapshot.Build(dataDir, loadJournal(t), 'H')
 	require.NoError(t, err)
@@ -105,7 +105,7 @@ func TestBuildAggregatesCreditsAndSeparatesPending(t *testing.T) {
 }
 
 func TestWriteThenVerifyRoundTripsAndDetectsTampering(t *testing.T) {
-	dataDir, _, _, _ := writeArtifacts(t)
+	dataDir, _, _ := writeArtifacts(t)
 	j := loadJournal(t)
 
 	snap, bundles, err := snapshot.Build(dataDir, j, 'H')
