@@ -19,7 +19,7 @@ Keep this file short; when you update it, ALWAYS be very laconic.
 
 - Waves burn address: `3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1` (provably unspendable vanity, pinned in `internal/chain/waves/address.go`).
 - Binding message `hearth-genesis-binding:v1:<source>:<hearth>`; formats `raw` (bindsign CLI) and `keeper-v1` (Keeper signCustomData envelope `[255,255,255,1] ++ msg`), proven live against a real Keeper extension.
-- API: `GET /api/preview/waves/{source}`, `GET /api/address/{hearth}`, `POST /api/bindings`, `GET /bind`. Credit fields are `minimumCredit`/`minimumCreditMicro`: the max weekly-average price can only grow until snapshot freeze, so the figure is a floor in HRTH terms.
+- API: `GET /api/preview/waves/{source}`, `GET /api/address/{hearth}`, `GET /api/stats`, `POST /api/bindings`, `GET /bind`. Credit fields are `minimumCredit`/`minimumCreditMicro`: the max weekly-average price can only grow until snapshot freeze, so the figure is a floor in HRTH terms. CORS only for origins in config `allowedOrigins` (empty = none).
 - Burn statuses: pending_confirmations → pending_crosscheck → confirmed | mismatch; burns show immediately, only confirmed ones are credited. Cross-check runs against two independent public nodes.
 - History rule: transfer-like tx types only (1/2/4/11); any other type blocks the address to manual review. Lease support is a deliberate wave-2 item.
 - Local `config.json` (gitignored) currently runs with `confirmations: 0` for development; before network launch wipe `data/` and re-run the whole window with a real confirmation depth.
