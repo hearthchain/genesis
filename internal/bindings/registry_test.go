@@ -88,3 +88,36 @@ func TestLatestBindingWins(t *testing.T) {
 	assert.Equal(t, second.Hearth, hearth)
 	assert.Empty(t, reg.SourcesFor(first.Hearth), "the replaced hearth loses the source")
 }
+
+func keeperSignedRecord(t *testing.T, seed, hearthSeed string) bindings.Record {
+	t.Helper()
+	rec := signedRecord(t, seed, hearthSeed)
+	sec, _, err := crypto.GenerateKeyPair([]byte(seed))
+	require.NoError(t, err)
+	sig, err := crypto.Sign(sec, binding.KeeperV1Envelope(binding.Message(rec.Source, rec.Hearth)))
+	require.NoError(t, err)
+	rec.Signature = sig.String()
+	rec.Format = "keeper-v1"
+	return rec
+}
+
+func TestAddDispatchesByFormat(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "b.jsonl")
+	reg, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+
+	keeper := keeperSignedRecord(t, "keeper seed", "keeper hearth")
+	require.NoError(t, reg.Add(keeper))
+	hearth, ok := reg.HearthFor(keeper.Source)
+	require.True(t, ok)
+	assert.Equal(t, keeper.Hearth, hearth)
+
+	// The same signature under the raw format must fail: formats don't cross.
+	crossed := keeper
+	crossed.Format = ""
+	assert.ErrorIs(t, reg.Add(crossed), binding.ErrBadSignature)
+
+	unknown := signedRecord(t, "unknown seed", "unknown hearth")
+	unknown.Format = "keeper-v2"
+	assert.ErrorContains(t, reg.Add(unknown), "format")
+}

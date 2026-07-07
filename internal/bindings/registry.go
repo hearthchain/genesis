@@ -20,6 +20,7 @@ type Record struct {
 	Hearth     string    `json:"hearth"`
 	PublicKey  string    `json:"publicKey"`
 	Signature  string    `json:"signature"`
+	Format     string    `json:"format,omitempty"` // "" or "raw": plain message; "keeper-v1": Keeper signCustomData envelope
 	ReceivedAt time.Time `json:"receivedAt"`
 }
 
@@ -46,8 +47,19 @@ func Load(path string, hearthScheme byte) (*Registry, error) {
 }
 
 // Add verifies a submitted binding and, when valid, appends and indexes it.
+// The Format field selects what bytes the signature covers: the canonical
+// message itself (bindsign, CLI) or the Keeper signCustomData v1 envelope.
 func (r *Registry) Add(rec Record) error {
-	if err := binding.Verify(rec.Source, rec.Hearth, r.hearthScheme, rec.PublicKey, rec.Signature); err != nil {
+	var err error
+	switch rec.Format {
+	case "", "raw":
+		err = binding.Verify(rec.Source, rec.Hearth, r.hearthScheme, rec.PublicKey, rec.Signature)
+	case "keeper-v1":
+		err = binding.VerifyKeeperV1(rec.Source, rec.Hearth, r.hearthScheme, rec.PublicKey, rec.Signature)
+	default:
+		err = fmt.Errorf("bindings: unknown signature format %q", rec.Format)
+	}
+	if err != nil {
 		return err
 	}
 	if rec.ReceivedAt.IsZero() {
@@ -55,8 +67,8 @@ func (r *Registry) Add(rec Record) error {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := store.AppendJSONL(r.path, rec); err != nil {
-		return fmt.Errorf("bindings: %w", err)
+	if aErr := store.AppendJSONL(r.path, rec); aErr != nil {
+		return fmt.Errorf("bindings: %w", aErr)
 	}
 	r.bySource[rec.Source] = rec
 	return nil
