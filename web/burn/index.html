@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth genesis · pick a chain to burn</title>
+<meta name="description" content="Pick the fallen chain you hold. Waves is live; the other nine lanes open during the burn window.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cg%20fill='none'%20stroke='%23C86F00'%20stroke-width='5'%20stroke-linecap='round'%3E%3Cpath%20d='M7%2013%20H57'/%3E%3Cpath%20d='M13%2013%20V55'/%3E%3Cpath%20d='M51%2013%20V55'/%3E%3Cpath%20d='M7%2055%20H57'/%3E%3C/g%3E%3Cpath%20fill='%23F7931A'%20d='M32%2026%20C26%2034%2022.8%2040%2026.2%2046.2%20A6.9%206.9%200%200%200%2037.8%2046.2%20C41.2%2040%2038%2034%2032%2026%20Z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/hearth.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="../">
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" style="flex: none; display: block;">
+        <g fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round">
+          <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+        </g>
+        <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+      </svg>
+      <span style="font-family: var(--serif); font-weight: normal; font-size: 1.25rem;">Hearth</span>
+      <span style="font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .12em; margin-top: 4px;">GENESIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="./">Burn</a>
+      <a href="../a/">Cabinet</a>
+      <a href="../disputes/">Disputes</a>
+      <a class="gh" href="https://hearth.tech">hearth.tech</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Start a burn</p>
+      <h2 class="h2">Which chain do you hold?</h2>
+      <p class="sec-intro">Each chain has its own lane: a credit preview by source address, the published burn target, and the binding step. Waves is live first; every other lane opens during the window with its exact target published before it opens.</p>
+    </div>
+    <div class="grid cols-3">
+      <a class="card" href="waves/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Waves</p><span class="pill pill-solid">Live</span>
+        </div>
+        <p class="body">Plain transfer to a provably unspendable address. Preview, burn, and bind today.</p>
+        <span class="goto">waves/ →</span>
+      </a>
+      <a class="card" href="eos/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">EOS / Vaulta</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Burn mechanism finalized during design; published before the lane opens.</p>
+        <span class="goto">eos/ →</span>
+      </a>
+      <a class="card" href="nem/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">NEM</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Transfer to a provably unowned address.</p>
+        <span class="goto">nem/ →</span>
+      </a>
+      <a class="card" href="iota/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">IOTA</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Burn mechanism finalized during design; published before the lane opens.</p>
+        <span class="goto">iota/ →</span>
+      </a>
+      <a class="card" href="neo/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">NEO</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">NEP-17 transfer to a burn address on N3.</p>
+        <span class="goto">neo/ →</span>
+      </a>
+      <a class="card" href="tezos/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Tezos</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Burn address or a minimal burn contract.</p>
+        <span class="goto">tezos/ →</span>
+      </a>
+      <a class="card" href="bsv/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Bitcoin SV</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Unspendable OP_FALSE OP_RETURN output.</p>
+        <span class="goto">bsv/ →</span>
+      </a>
+      <a class="card" href="lisk/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Lisk</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">ERC-20 on an Ethereum L2, transfer to the dead address.</p>
+        <span class="goto">lisk/ →</span>
+      </a>
+      <a class="card" href="bitshares/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">BitShares</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Native burn operation to the reserve pool.</p>
+        <span class="goto">bitshares/ →</span>
+      </a>
+      <a class="card" href="stratis/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Stratis</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Transfer to the dead address on StratisEVM.</p>
+        <span class="goto">stratis/ →</span>
+      </a>
+    </div>
+    <div class="notice" style="margin: 40px auto 0; max-width: 640px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Never burn straight from an exchange.</strong> Withdraw to your own address first, then burn. Exchange addresses are blacklisted, exchange custody never earns the holding multiplier, and a withdrawal sent directly to a burn address credits nobody.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="container" style="position: relative; z-index: 1; text-align: center; padding-top: 60px; padding-bottom: 96px;">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true" style="display: block; margin: 0 auto;">
+      <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+        <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+      </g>
+      <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+    </svg>
+    <p style="font-family: var(--serif); font-size: 1.2rem; margin: 12px 0 0;">Hearth genesis</p>
+    <p class="micro" style="max-width: 620px; margin: 16px auto 0;">Credit converts to HRTH one to one by the published formula. Loyalty to a fallen chain converts into a share of the new network. The starting supply is floating: the sum of all credited burns plus the published team and treasury share, so turnout sets it. Credit is not compensation, promises no dollar value, and implies no price floor for HRTH.</p>
+    <nav aria-label="Footer" style="display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; font-size: .88rem; margin-top: 22px;">
+      <a href="https://hearth.tech" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">hearth.tech</a>
+      <a href="https://github.com/hearthchain/burning-page" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">GitHub</a>
+      <a href="../disputes/" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">Disputes</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
