@@ -1,6 +1,7 @@
 package journal_test
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -54,4 +55,12 @@ func TestMaxSinceAfterLastWeekFails(t *testing.T) {
 
 	_, _, err = j.MaxSince(date(t, "2999-01-01"))
 	assert.Error(t, err, "no journal weeks at or after the date")
+}
+
+func TestLoadRejectsHeaderlessCSV(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "no-header.csv")
+	require.NoError(t, os.WriteFile(path, []byte("2016-06-05,0.9\n2016-06-12,1.1\n"), 0o600))
+
+	_, err := journal.Load(path)
+	assert.ErrorContains(t, err, "header", "a data row in the header position means silent data loss")
 }

@@ -43,6 +43,9 @@ func Load(path string) (*Journal, error) {
 	if len(rows) < columns {
 		return nil, fmt.Errorf("journal: %s has no data rows", path)
 	}
+	if _, headErr := time.Parse(time.DateOnly, rows[0][0]); headErr == nil {
+		return nil, fmt.Errorf("journal: %s: first row is data, not a header; a missing header would silently drop a week", path)
+	}
 	weeks := make([]Week, 0, len(rows)-1)
 	for _, row := range rows[1:] {
 		if len(row) != columns {
