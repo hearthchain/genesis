@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth genesis · burn EOS / Vaulta</title>
+<meta name="description" content="Burn A or legacy EOS for Hearth genesis credit: send a plain transfer to eosio.null from any wallet, bind with a transfer memo, preview your layers.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cg%20fill='none'%20stroke='%23C86F00'%20stroke-width='5'%20stroke-linecap='round'%3E%3Cpath%20d='M7%2013%20H57'/%3E%3Cpath%20d='M13%2013%20V55'/%3E%3Cpath%20d='M51%2013%20V55'/%3E%3Cpath%20d='M7%2055%20H57'/%3E%3C/g%3E%3Cpath%20fill='%23F7931A'%20d='M32%2026%20C26%2034%2022.8%2040%2026.2%2046.2%20A6.9%206.9%200%200%200%2037.8%2046.2%20C41.2%2040%2038%2034%2032%2026%20Z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../../assets/hearth.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="../../">
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" style="flex: none; display: block;">
+        <g fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round">
+          <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+        </g>
+        <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+      </svg>
+      <span style="font-family: var(--serif); font-weight: normal; font-size: 1.25rem;">Hearth</span>
+      <span style="font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .12em; margin-top: 4px;">GENESIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="../../#chains">Burn</a>
+      <a href="../../a/">Cabinet</a>
+      <a href="../../disputes/">Disputes</a>
+      <a class="gh" href="https://hearth.tech">hearth.tech</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<!-- BURN -->
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Burn EOS / Vaulta</p>
+      <h2 class="h2">One plain transfer. Nothing else.</h2>
+      <p class="sec-intro">Send A (or legacy EOS) to the system null account from your own wallet, never from an exchange. Both tokens count the same, one for one. Then bind below where your HRTH credit goes.</p>
+    </div>
+    <div class="card" style="max-width: 640px; margin: 40px auto 0; text-align: center;">
+      <p class="label">The EOS burn account</p>
+      <p class="addr" id="burn-address" style="font-size: 1.05rem; margin: 14px 0 0;">eosio.null</p>
+      <p style="margin: 18px 0 0;"><button class="btn btn-gray" id="copy-address" type="button">Copy account</button> <span class="micro" id="copy-done" hidden>copied</span></p>
+      <p class="micro" style="margin: 14px 0 0;">Works as a plain transfer from Anchor, Wombat, TokenPocket, OKX Wallet, or the Unicove web wallet. No memo is needed for the burn itself.</p>
+    </div>
+    <ul class="list" style="max-width: 640px; margin: 30px auto 0;">
+      <li><span class="dash">–</span><span>Any amount, in one or several transactions, any time before the window closes.</span></li>
+      <li><span class="dash">–</span><span>Burn and bind in any order; the credit follows the sending account.</span></li>
+      <li><span class="dash">–</span><span>No Hearth address yet? Burn now, bind later: unbound burns wait in the journal and credit as soon as your binding arrives.</span></li>
+    </ul>
+    <p class="micro" style="max-width: 640px; margin: 20px auto 0; text-align: center;"><span class="addr">eosio.null</span> is the chain's built-in null account: its permissions are provably unsatisfiable, so what arrives there can never move.</p>
+    <div class="notice" style="margin: 30px auto 0; max-width: 640px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Never burn straight from an exchange.</strong> Withdraw to your own account first, then burn. Exchange accounts are blacklisted, exchange custody breaks the continuous holding period your credit is priced from, and a withdrawal sent directly to a burn account credits nobody.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BIND -->
+<section id="bind" style="background: var(--panel);">
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Bind</p>
+      <h2 class="h2">Bind the account with a transfer memo.</h2>
+      <p class="sec-intro">EOS wallets cannot sign a bare statement, so the binding rides a memo instead: generate it below, then either put it in the burn transfer itself, or send a separate 0.0001 A transfer to <span class="addr">eosio.null</span> with it later, from the account you burn from. The transfer is signed by your account's key on chain, and that signature is the whole proof.</p>
+    </div>
+    <div class="card" style="max-width: 640px; margin: 40px auto 0;">
+      <form id="memo-form">
+        <div class="form-row">
+          <input id="memo-account" placeholder="Your EOS account, e.g. youraccount1" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="form-row">
+          <input id="memo-hearth" placeholder="Hearth address to receive the credit, 3H..." autocomplete="off" spellcheck="false">
+        </div>
+        <p style="margin: 18px 0 0;"><button class="btn btn-primary" id="memo-go" type="submit">Generate memo</button></p>
+      </form>
+      <div class="result err" id="memo-error" hidden style="margin-top: 18px;"></div>
+      <div id="memo-result" hidden style="margin-top: 18px;">
+        <p class="label" style="font-size: .66rem;">Your binding memo, copy it exactly</p>
+        <p class="addr" id="memo-out" style="margin: 10px 0 0; word-break: break-all;"></p>
+        <p style="margin: 14px 0 0;"><button class="btn btn-gray" id="memo-copy" type="button">Copy memo</button> <span class="micro" id="memo-copy-done" hidden>copied</span></p>
+        <ol style="font-size: .9rem; line-height: 1.7; margin: 16px 0 0; padding-left: 20px;">
+          <li>Copy the memo above.</li>
+          <li>Send your burn to <span class="addr">eosio.null</span> with this memo, or, if you burned already, send exactly 0.0001 A there with it.</li>
+          <li>The binding shows in your cabinet once the transfer is confirmed on two independent sources.</li>
+        </ol>
+      </div>
+    </div>
+    <p class="micro" style="max-width: 640px; margin: 24px auto 0; text-align: center;">The statement is <span class="addr">hearth-genesis-binding:v1:&lt;account&gt;:&lt;hearth&gt;</span>; only the latest binding per account counts at snapshot freeze, so a binding can be corrected by sending another memo.</p>
+  </div>
+</section>
+
+<!-- OPTIONAL PREVIEW -->
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Optional</p>
+      <h2 class="h2">Preview what your history is worth.</h2>
+      <p class="sec-intro">Type the EOS account you would burn from. This is a public read: no wallet, no signature. The backend rebuilds your minimum-balance layers from transfer history and prices each at its best week.</p>
+    </div>
+    <form class="form-row" id="preview-form" style="max-width: 560px; margin-left: auto; margin-right: auto;">
+      <input id="preview-input" placeholder="youraccount1" autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" type="submit" id="preview-go">Preview credit</button>
+    </form>
+    <div class="result err" id="preview-error" hidden style="max-width: 560px; margin: 20px auto 0;"></div>
+    <div id="preview-result" hidden>
+      <div class="glance" style="margin-top: 36px; grid-template-columns: repeat(2, 1fr); max-width: 640px; margin-left: auto; margin-right: auto;">
+        <div class="glance-item">
+          <p class="label" style="font-size: .66rem;">Minimum credit if fully burned</p>
+          <p class="stat" id="preview-credit">·</p>
+          <p class="stat-sub">Until the snapshot freezes, the figure is a minimum: the best-week price can only grow.</p>
+        </div>
+        <div class="glance-item">
+          <p class="label" style="font-size: .66rem;">Account</p>
+          <p class="addr micro" id="preview-addr" style="margin-top: 8px;"></p>
+          <p class="stat-sub">on a partial burn, layers are consumed oldest first</p>
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top: 24px;">
+        <table>
+          <caption>Layers, one per continuous holding stretch</caption>
+          <thead>
+            <tr><th>Held since</th><th>Best week</th><th class="num">Amount, A</th><th class="num">Week avg, $</th><th class="num">Credit, HRTH</th></tr>
+          </thead>
+          <tbody id="preview-layers"></tbody>
+        </table>
+      </div>
+      <p class="micro" style="max-width: 640px; margin: 20px auto 0; text-align: center;">The public history index starts 2023-03-18; anything held before then counts as one opening layer dated at that boundary. The figure is a floor in HRTH terms: it can only grow if deeper history is added.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="container" style="position: relative; z-index: 1; text-align: center; padding-top: 60px; padding-bottom: 96px;">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true" style="display: block; margin: 0 auto;">
+      <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+        <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+      </g>
+      <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+    </svg>
+    <p style="font-family: var(--serif); font-size: 1.2rem; margin: 12px 0 0;">Hearth genesis</p>
+    <p class="micro" style="max-width: 620px; margin: 16px auto 0;">Credit converts to HRTH one to one by the published formula. Loyalty to a fallen chain converts into a share of the new network. The starting supply is floating: the sum of all credited burns plus the published team and treasury share, so turnout sets it. Credit is not compensation, promises no dollar value, and implies no price floor for HRTH.</p>
+    <nav aria-label="Footer" style="display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; font-size: .88rem; margin-top: 22px;">
+      <a href="https://hearth.tech" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">hearth.tech</a>
+      <a href="https://github.com/hearthchain/burning-page" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">GitHub</a>
+      <a href="../../disputes/" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">Disputes</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../../assets/js/config.js"></script>
+<script src="../../assets/js/api.js"></script>
+<script src="../../assets/js/burn-eos.js"></script>
+</body>
+</html>
