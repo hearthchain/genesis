@@ -10,5 +10,5 @@
   // fetch, so fall back to the default instead.
   window.HEARTH_API_BASE = stored && /^https?:\/\//.test(stored.trim())
     ? stored.trim().replace(/\/+$/, "")
-    : (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://" + location.hostname + ":8080" : "https://api.hearth.tech");
+    : (["localhost", "127.0.0.1"].includes(location.hostname) ? "http://" + location.hostname + ":8080" : "https://157-230-0-211.sslip.io"); // until api.hearth.tech DNS exists
 })();
