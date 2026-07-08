@@ -4,9 +4,35 @@
 package chain
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 )
+
+// Adapter is the per-chain port the watcher and the API consume: everything
+// chain-specific (node protocols, tx decoding, invariants) lives behind it.
+type Adapter interface {
+	// Name is the chain slug used in artifacts, routes and config ("waves").
+	Name() string
+	// ValidateAddress rejects strings that are not a source address (or
+	// account name) on this chain's mainnet.
+	ValidateAddress(addr string) error
+	// Height returns the finalized tip the confirmation rule counts from:
+	// the node height on Waves, the last irreversible block on EOS.
+	Height(ctx context.Context) (uint64, error)
+	// BurnCandidates lists the burns detected inside the window, mature or
+	// not; confirmation depth is the watcher's call.
+	BurnCandidates(ctx context.Context, window Window) ([]Burn, error)
+	// CrossCheck re-fetches a burn from the independent secondary source
+	// and compares the canonical fields.
+	CrossCheck(ctx context.Context, burn Burn, confirmations uint64) (Verdict, error)
+	// History fetches and verifies the source's transfer history; Status
+	// "ok" is required before any credit is computed.
+	History(ctx context.Context, source string, reference, tip uint64) (History, error)
+	// Deltas replays raw history rows into signed balance changes; it must
+	// reproduce a History's Recomputed sum from its Txs.
+	Deltas(txs []json.RawMessage, addr string) ([]Delta, Status)
+}
 
 // Window bounds a burn campaign in block heights, inclusive on both ends.
 type Window struct {
@@ -34,6 +60,13 @@ type Delta struct {
 	Amount    int64     `json:"amount"`
 }
 
+// The two verdicts of history verification: anything that is not provably
+// "ok" is "unsupported" and blocks the address to manual review.
+const (
+	StatusOK          = "ok"
+	StatusUnsupported = "unsupported"
+)
+
 // Status is the verdict of a delta reconstruction: Kind "ok" or "unsupported"
 // (the history contains a transaction the adapter does not interpret; the
 // address is blocked to manual review rather than risking a wrong credit).
@@ -51,15 +84,20 @@ type Verdict struct {
 	Mismatches []string `json:"mismatchFields,omitempty"`
 }
 
-// History is the reconstructed balance-delta history of one address together
-// with the safety-invariant verdict. Status is "ok" only when the recomputed
-// balance exactly matches the node-reported balance at ReferenceHeight.
+// History is the fetched and verified transfer history of one address
+// together with the safety-invariant verdict. Status is "ok" only when the
+// balance recomputed from Txs exactly matches the node-reported balance at
+// ReferenceHeight. On chains whose public history is truncated (EOS), the
+// pre-index remainder is a synthetic opening layer dated OpeningAt; zero
+// OpeningBaseUnits means the history is complete from genesis.
 type History struct {
-	Address         string  `json:"address"`
-	Deltas          []Delta `json:"deltas"`
-	ReferenceHeight uint64  `json:"referenceHeight"`
-	NodeBalance     uint64  `json:"nodeBalanceBaseUnits"`
-	Recomputed      int64   `json:"recomputedBaseUnits"`
-	Status          string  `json:"status"`
-	Reason          string  `json:"reason,omitempty"`
+	Address          string
+	Txs              []json.RawMessage // verbatim source rows, ascending height
+	ReferenceHeight  uint64
+	NodeBalance      uint64
+	Recomputed       int64
+	OpeningBaseUnits uint64
+	OpeningAt        time.Time
+	Status           string
+	Reason           string
 }

@@ -17,11 +17,11 @@ func Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, chain.Status) {
 	for _, raw := range txs {
 		var tx deltaTx
 		if err := json.Unmarshal(raw, &tx); err != nil {
-			return nil, chain.Status{Kind: "unsupported", Reason: fmt.Sprintf("undecodable transaction: %v", err)}
+			return nil, chain.Status{Kind: chain.StatusUnsupported, Reason: fmt.Sprintf("undecodable transaction: %v", err)}
 		}
 		amount, ok := tx.deltaFor(addr)
 		if !ok {
-			return nil, chain.Status{Kind: "unsupported", Reason: fmt.Sprintf("transaction type %d (id %s)", tx.Type, tx.ID)}
+			return nil, chain.Status{Kind: chain.StatusUnsupported, Reason: fmt.Sprintf("transaction type %d (id %s)", tx.Type, tx.ID)}
 		}
 		deltas = append(deltas, chain.Delta{
 			TxID:      tx.ID,
@@ -31,7 +31,7 @@ func Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, chain.Status) {
 		})
 	}
 	sort.SliceStable(deltas, func(i, j int) bool { return deltas[i].Height < deltas[j].Height })
-	return deltas, chain.Status{Kind: "ok"}
+	return deltas, chain.Status{Kind: chain.StatusOK}
 }
 
 // deltaTx is the projection of a node transaction the delta rules read.
