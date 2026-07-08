@@ -13,10 +13,15 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/store"
 )
+
+// statusConfirmed is the terminal success status shared by burns and
+// binding cross-checks.
+const statusConfirmed = "confirmed"
 
 // BurnRecord is one burns.jsonl line; a later line with the same TxID
 // supersedes an earlier one (pending burns get re-checked on later polls).
@@ -32,6 +37,9 @@ type Watcher struct {
 	Adapter  chain.Adapter
 	ChainCfg config.ChainConfig
 	DataDir  string
+	// Registry receives on-chain memo bindings when the adapter is a
+	// chain.BindingSource; nil disables harvesting (the Waves watcher).
+	Registry *bindings.Registry
 }
 
 // Poll performs one full-window pass.
@@ -56,6 +64,46 @@ func (w *Watcher) Poll(ctx context.Context) error {
 			return pErr
 		}
 	}
+	return w.harvestBindings(ctx, tip)
+}
+
+// harvestBindings records the chain's memo bindings: each one is
+// cross-checked against the secondary source before it enters the registry,
+// exactly like a burn. Memos are applied in ascending chain order so the
+// latest one per source wins; already-recorded transactions are skipped, so
+// the append-only artifact does not grow on idle polls.
+func (w *Watcher) harvestBindings(ctx context.Context, tip uint64) error {
+	source, ok := w.Adapter.(chain.BindingSource)
+	if !ok || w.Registry == nil {
+		return nil
+	}
+	memos, err := source.MemoBindings(ctx, w.ChainCfg.Window.Start)
+	if err != nil {
+		return err
+	}
+	for _, mb := range memos {
+		if mb.Height > tip || w.Registry.SeenTx(mb.TxID) {
+			continue
+		}
+		verdict, cErr := source.CrossCheckBinding(ctx, mb)
+		if cErr != nil {
+			return cErr
+		}
+		if verdict.Status != statusConfirmed {
+			continue
+		}
+		rec := bindings.Record{
+			Source: mb.Source,
+			Chain:  w.Adapter.Name(),
+			Hearth: mb.Hearth,
+			Format: "eos-memo-v1",
+			TxID:   mb.TxID,
+		}
+		if aErr := w.Registry.AddVerified(rec); aErr != nil {
+			return aErr
+		}
+		slog.Info("binding recorded", "source", mb.Source, "hearth", mb.Hearth, "txId", mb.TxID)
+	}
 	return nil
 }
 
@@ -75,7 +123,7 @@ func (w *Watcher) latestRecords() (map[string]BurnRecord, error) {
 
 func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[string]BurnRecord, tip uint64) error {
 	prev, seen := latest[b.TxID]
-	if seen && (prev.Status == "confirmed" || prev.Status == "mismatch") {
+	if seen && (prev.Status == statusConfirmed || prev.Status == "mismatch") {
 		return nil
 	}
 	if b.Height+w.ChainCfg.Confirmations > tip {
@@ -101,7 +149,7 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 		return aErr
 	}
 	slog.Info("burn recorded", "txId", b.TxID, "source", b.Source, "amount", b.Amount, "status", verdict.Status)
-	if verdict.Status != "confirmed" {
+	if verdict.Status != statusConfirmed {
 		return nil
 	}
 	return w.ensureHistory(ctx, b.Source, tip)

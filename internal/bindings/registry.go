@@ -39,6 +39,7 @@ type Registry struct {
 	path         string
 	hearthScheme byte
 	bySource     map[string]Record
+	seenTx       map[string]bool
 }
 
 // Load reads the artifact and indexes the latest binding per source. Records
@@ -48,9 +49,17 @@ func Load(path string, hearthScheme byte) (*Registry, error) {
 	if err != nil {
 		return nil, err
 	}
-	r := &Registry{path: path, hearthScheme: hearthScheme, bySource: make(map[string]Record, len(records))}
+	r := &Registry{
+		path:         path,
+		hearthScheme: hearthScheme,
+		bySource:     make(map[string]Record, len(records)),
+		seenTx:       make(map[string]bool, len(records)),
+	}
 	for _, rec := range records {
 		r.bySource[rec.Source] = rec
+		if rec.TxID != "" {
+			r.seenTx[rec.TxID] = true
+		}
 	}
 	return r, nil
 }
@@ -98,7 +107,18 @@ func (r *Registry) append(rec Record) error {
 		return fmt.Errorf("bindings: %w", aErr)
 	}
 	r.bySource[rec.Source] = rec
+	if rec.TxID != "" {
+		r.seenTx[rec.TxID] = true
+	}
 	return nil
+}
+
+// SeenTx reports whether a binding carried by this transaction was already
+// recorded, including bindings later superseded (append-only dedup).
+func (r *Registry) SeenTx(txID string) bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.seenTx[txID]
 }
 
 // Current returns the source's latest binding record.

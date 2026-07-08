@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/hearthchain/burning-page/internal/binding"
 	"github.com/hearthchain/burning-page/internal/chain"
 )
 
@@ -33,6 +34,43 @@ func CrossCheck(ctx context.Context, secondary Secondary, burn chain.Burn) (chai
 	mismatches, err := compareCanonical(burn, info)
 	if err != nil {
 		return chain.Verdict{}, err
+	}
+	if len(mismatches) > 0 {
+		return chain.Verdict{Status: "mismatch", Mismatches: mismatches}, nil
+	}
+	return chain.Verdict{Status: "confirmed"}, nil
+}
+
+// CrossCheckBinding verifies a memo binding against the secondary source:
+// the transaction must be irreversible there and carry a transfer from the
+// binding's source to some account with exactly the canonical binding memo.
+// A missing or different memo is a mismatch; a reversible transaction stays
+// pending and is retried on the next poll.
+func CrossCheckBinding(ctx context.Context, secondary Secondary, mb chain.MemoBinding) (chain.Verdict, error) {
+	info, err := secondary.GetTransaction(ctx, mb.TxID)
+	if err != nil {
+		return chain.Verdict{}, err
+	}
+	if !info.Irreversible {
+		return chain.Verdict{Status: "pending_crosscheck"}, nil
+	}
+	var mismatches []string
+	if info.ID != mb.TxID {
+		mismatches = append(mismatches, "id")
+	}
+	if info.BlockNum != mb.Height {
+		mismatches = append(mismatches, "height")
+	}
+	want := string(binding.Message(mb.Source, mb.Hearth))
+	found := false
+	for _, tr := range info.Transfers {
+		if tr.From == mb.Source && tr.Memo == want {
+			found = true
+			break
+		}
+	}
+	if !found {
+		mismatches = append(mismatches, "memo")
 	}
 	if len(mismatches) > 0 {
 		return chain.Verdict{Status: "mismatch", Mismatches: mismatches}, nil

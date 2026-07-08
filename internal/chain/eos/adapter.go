@@ -63,6 +63,11 @@ func (a *Adapter) Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, cha
 	return Deltas(txs, addr)
 }
 
+// CrossCheckBinding verifies one memo binding against the secondary source.
+func (a *Adapter) CrossCheckBinding(ctx context.Context, mb chain.MemoBinding) (chain.Verdict, error) {
+	return CrossCheckBinding(ctx, a.Secondary, mb)
+}
+
 // MemoBindings lists the valid binding memos carried by transfers to the
 // burn account from fromHeight on, ascending.
 func (a *Adapter) MemoBindings(ctx context.Context, fromHeight uint64) ([]chain.MemoBinding, error) {

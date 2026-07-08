@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
 	"github.com/hearthchain/burning-page/internal/chain/chains"
 	"github.com/hearthchain/burning-page/internal/config"
@@ -47,7 +48,12 @@ func run() int {
 		slog.Error("adapter", "err", err)
 		return 1
 	}
-	w := &watcher.Watcher{Adapter: adapter, ChainCfg: cc, DataDir: cfg.DataDir}
+	reg, err := bindings.Load(cfg.DataDir+"/bindings.jsonl", cfg.HearthSchemeByte())
+	if err != nil {
+		slog.Error("bindings", "err", err)
+		return 1
+	}
+	w := &watcher.Watcher{Adapter: adapter, ChainCfg: cc, DataDir: cfg.DataDir, Registry: reg}
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()

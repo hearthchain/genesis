@@ -75,6 +75,9 @@ type BindingSource interface {
 	// wins downstream). No upper bound: bindings stay open after the burn
 	// window closes.
 	MemoBindings(ctx context.Context, fromHeight uint64) ([]MemoBinding, error)
+	// CrossCheckBinding verifies one memo binding against the independent
+	// secondary source before it may enter the registry.
+	CrossCheckBinding(ctx context.Context, mb MemoBinding) (Verdict, error)
 }
 
 // MemoBinding is one on-chain binding statement: the transfer carrying it is

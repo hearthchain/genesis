@@ -198,3 +198,20 @@ func TestAddRejectsMemoFormatFromTheAPI(t *testing.T) {
 	require.Error(t, err)
 	assert.NotContains(t, err.Error(), "unknown", "the format is known, just not submittable")
 }
+
+func TestSeenTxTracksEveryRecordedBindingTx(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "bindings.jsonl")
+	reg, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+
+	require.NoError(t, reg.AddVerified(memoRecord(t, "eos hearth one", "trx-one")))
+	require.NoError(t, reg.AddVerified(memoRecord(t, "eos hearth two", "trx-two")))
+
+	assert.True(t, reg.SeenTx("trx-one"), "superseded bindings stay deduplicated")
+	assert.True(t, reg.SeenTx("trx-two"))
+	assert.False(t, reg.SeenTx("trx-three"))
+
+	reg2, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+	assert.True(t, reg2.SeenTx("trx-one"), "the seen set survives a reload")
+}
