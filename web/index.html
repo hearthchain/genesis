@@ -46,8 +46,9 @@
         <p class="stat" id="stat-credit">·</p>
       </div>
       <div class="glance-item">
-        <p class="label" style="font-size: .66rem;">WAVES burned</p>
+        <p class="label" style="font-size: .66rem;">Coins burned</p>
         <p class="stat" id="stat-burned">·</p>
+        <p class="stat" id="stat-burned-eos" style="font-size: 1.1rem; margin-top: 4px;">·</p>
         <p class="stat-sub" id="stat-burned-sub"></p>
       </div>
       <div class="glance-item">
@@ -67,13 +68,20 @@
 <section id="chains">
   <div class="container section-pad" style="padding-top: 32px;">
     <p class="label" style="text-align: center;">Start a burn · which chain do you hold?</p>
-    <div class="grid cols-3" style="margin-top: 24px;">
+    <div class="grid cols-4" style="margin-top: 24px;">
       <a class="card" href="burn/waves/">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
           <p class="label">Waves</p><span class="pill pill-solid">Live</span>
         </div>
         <p class="body">Plain transfer to a provably unspendable address. Preview, burn, and bind today.</p>
         <span class="goto">burn/waves/ →</span>
+      </a>
+      <a class="card" href="burn/eos/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">EOS / Vaulta</p><span class="pill pill-solid">Live</span>
+        </div>
+        <p class="body">Plain transfer of A to the system null account, from any EOS wallet. Preview, burn, and bind today.</p>
+        <span class="goto">burn/eos/ →</span>
       </a>
       <a class="card" href="burn/nem/">
         <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">

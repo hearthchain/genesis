@@ -54,6 +54,7 @@ h1 { font-family: var(--serif); font-weight: normal; font-size: clamp(1.7rem, 4.
 
 .grid { display: grid; gap: 20px; margin-top: 44px; }
 .cols-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
 .cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
 
 .card { background: #FFF; border: 1px solid var(--hair); border-radius: 4px; padding: 24px; transition: border-color .15s ease; }
