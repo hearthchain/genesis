@@ -10,16 +10,19 @@ import (
 	"github.com/hearthchain/burning-page/internal/chain"
 )
 
-// ChainAPI is the balance/account surface history verification needs;
-// *Client satisfies it.
+// ChainAPI is the finality/balance/account surface of a chain API node;
+// *Client and the fixture source satisfy it.
 type ChainAPI interface {
+	LastIrreversibleBlock(ctx context.Context) (uint64, error)
 	CombinedBalance(ctx context.Context, account string) (uint64, error)
 	AccountCreated(ctx context.Context, account string) (time.Time, error)
 }
 
-// HistoryAPI is the action-history surface; *Hyperion satisfies it.
+// HistoryAPI is the action-history surface; *Hyperion and the fixture source
+// satisfy it.
 type HistoryAPI interface {
 	TransferActions(ctx context.Context, account string, maxActions int) ([]json.RawMessage, error)
+	TransfersTo(ctx context.Context, account string, maxActions int) ([]json.RawMessage, error)
 }
 
 // maxHistoryActions caps how much history one source account may have before

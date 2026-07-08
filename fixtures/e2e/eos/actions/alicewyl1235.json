@@ -1,0 +1,8 @@
+[
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400000,"trx_id":"eosdeposit1","global_sequence":101,"act":{"account":"core.vaulta","name":"transfer","data":{"from":"someoneelse1","to":"alicewyl1235","quantity":"5.0000 A","memo":""}}},
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400100,"trx_id":"eosswap0001","global_sequence":201,"act":{"account":"eosio.token","name":"transfer","data":{"from":"alicewyl1235","to":"core.vaulta","quantity":"1.0000 EOS","memo":""}}},
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400100,"trx_id":"eosswap0001","global_sequence":202,"act":{"account":"core.vaulta","name":"transfer","data":{"from":"core.vaulta","to":"alicewyl1235","quantity":"1.0000 A","memo":""}}},
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400200,"trx_id":"eosspend001","global_sequence":301,"act":{"account":"core.vaulta","name":"transfer","data":{"from":"alicewyl1235","to":"someoneelse1","quantity":"0.5000 A","memo":""}}},
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400300,"trx_id":"eosburn0001","global_sequence":401,"act":{"account":"core.vaulta","name":"transfer","data":{"from":"alicewyl1235","to":"eosio.null","quantity":"2.0000 A","memo":""}}},
+{"@timestamp":"2026-07-04T12:00:00.000","block_num":508400400,"trx_id":"eosbind0001","global_sequence":501,"act":{"account":"core.vaulta","name":"transfer","data":{"from":"alicewyl1235","to":"eosio.null","quantity":"0.0001 A","memo":"hearth-genesis-binding:v1:alicewyl1235:3HGBPbaEvujdeikDNDwQ9gsZBVb3hY3HE2j"}}}
+]

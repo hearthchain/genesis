@@ -16,9 +16,9 @@ const maxBurnTargetActions = 500_000
 // operators: a chain API node (finality, balances, accounts), a Hyperion
 // index (action history) and a legacy v1 history node (cross-check).
 type Adapter struct {
-	API          *Client
-	Index        *Hyperion
-	Secondary    *Greymass
+	API          ChainAPI
+	Index        HistoryAPI
+	Secondary    Secondary
 	BurnAccount  string
 	HearthScheme byte
 }

@@ -42,11 +42,20 @@ func New(name string, cc config.ChainConfig, hearthScheme byte) (chain.Adapter, 
 
 // NewFixture builds a fixture-backed adapter over a directory instead of
 // live nodes (offline end-to-end mode).
-func NewFixture(name, dir string, cc config.ChainConfig, _ byte) (chain.Adapter, error) {
+func NewFixture(name, dir string, cc config.ChainConfig, hearthScheme byte) (chain.Adapter, error) {
 	switch name {
 	case Waves:
 		node := waves.NewFileNode(dir)
 		return &waves.Adapter{Primary: node, Secondary: node, BurnAddress: cc.BurnAddress}, nil
+	case Eos:
+		source := eos.NewFixtureSource(dir)
+		return &eos.Adapter{
+			API:          source,
+			Index:        source,
+			Secondary:    source,
+			BurnAccount:  cc.BurnAddress,
+			HearthScheme: hearthScheme,
+		}, nil
 	default:
 		return nil, fmt.Errorf("chains: no fixture adapter for chain %q", name)
 	}

@@ -33,12 +33,20 @@ func (f *fakeChainAPI) AccountCreated(context.Context, string) (time.Time, error
 	return f.created, nil
 }
 
+func (f *fakeChainAPI) LastIrreversibleBlock(context.Context) (uint64, error) {
+	return 508500000, nil
+}
+
 type fakeHistoryAPI struct {
 	rows []json.RawMessage
 	err  error
 }
 
 func (f *fakeHistoryAPI) TransferActions(context.Context, string, int) ([]json.RawMessage, error) {
+	return f.rows, f.err
+}
+
+func (f *fakeHistoryAPI) TransfersTo(context.Context, string, int) ([]json.RawMessage, error) {
 	return f.rows, f.err
 }
 

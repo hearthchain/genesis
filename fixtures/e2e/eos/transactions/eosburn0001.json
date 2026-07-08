@@ -1,0 +1,20 @@
+{
+ "id": "eosburn0001",
+ "block_num": 508400300,
+ "irreversible": true,
+ "traces": [
+  {
+   "receiver": "core.vaulta",
+   "act": {
+    "account": "core.vaulta",
+    "name": "transfer",
+    "data": {
+     "from": "alicewyl1235",
+     "to": "eosio.null",
+     "quantity": "2.0000 A",
+     "memo": ""
+    }
+   }
+  }
+ ]
+}
