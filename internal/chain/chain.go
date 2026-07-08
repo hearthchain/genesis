@@ -67,6 +67,27 @@ const (
 	StatusUnsupported = "unsupported"
 )
 
+// BindingSource is the optional adapter capability of chains whose bindings
+// ride on-chain transfer memos instead of API-submitted signatures.
+type BindingSource interface {
+	// MemoBindings lists the valid binding memos carried by transfers to the
+	// burn account from fromHeight on, in ascending chain order (latest
+	// wins downstream). No upper bound: bindings stay open after the burn
+	// window closes.
+	MemoBindings(ctx context.Context, fromHeight uint64) ([]MemoBinding, error)
+}
+
+// MemoBinding is one on-chain binding statement: the transfer carrying it is
+// signed by the source account's key, which is the whole proof.
+type MemoBinding struct {
+	Source    string
+	Hearth    string
+	TxID      string
+	Height    uint64
+	Timestamp time.Time
+	Raw       json.RawMessage // the carrying transfer row, for cross-check
+}
+
 // WithOpening prepends the synthetic opening delta of a truncated history:
 // the pre-index remainder enters as one deposit dated at the truncation
 // boundary, opening the oldest layer. Height 0 keeps it first under any
