@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/hearthchain/burning-page/internal/journal"
+	"github.com/hearthchain/burning-page/internal/chain"
 	"github.com/hearthchain/burning-page/internal/snapshot"
 	"github.com/hearthchain/burning-page/internal/store"
 )
@@ -22,7 +22,7 @@ type chainStats struct {
 // stats serves the front-page counters. Everything is recomputed from the
 // artifacts per request, like the address endpoint: the server stays a cache.
 func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
-	snap, _, err := snapshot.Build(s.cfg.DataDir, map[string]*journal.Journal{chainWaves: s.journal}, s.cfg.HearthSchemeByte())
+	snap, _, err := snapshot.Build(s.cfg.DataDir, s.journals, s.cfg.HearthSchemeByte())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "artifacts_error", err.Error())
 		return
@@ -45,8 +45,17 @@ func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
 		"pendingSources":   len(snap.PendingSources),
 		"blockedSources":   len(snap.BlockedSources),
 		"chains":           chains,
-		"window":           s.cfg.Chains[chainWaves].Window,
+		"windows":          s.windows(),
 	})
+}
+
+// windows lists each configured chain's burn window.
+func (s *Server) windows() map[string]chain.Window {
+	out := make(map[string]chain.Window, len(s.cfg.Chains))
+	for name, cc := range s.cfg.Chains {
+		out[name] = cc.Window
+	}
+	return out
 }
 
 // chainTotals folds the latest row per txId of burns.jsonl into per-chain

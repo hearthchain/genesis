@@ -20,6 +20,7 @@ import (
 	"github.com/hearthchain/burning-page/internal/binding"
 	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/hearthaddr"
 	"github.com/hearthchain/burning-page/internal/journal"
@@ -28,6 +29,8 @@ import (
 
 type fakeNode struct {
 	histories map[string][]json.RawMessage
+	tip       uint64
+	balances  map[string]uint64
 }
 
 func (f *fakeNode) AllTransactions(_ context.Context, addr string) ([]json.RawMessage, error) {
@@ -36,6 +39,12 @@ func (f *fakeNode) AllTransactions(_ context.Context, addr string) ([]json.RawMe
 		return nil, fmt.Errorf("fake: no such address %s", addr)
 	}
 	return txs, nil
+}
+
+func (f *fakeNode) Height(context.Context) (uint64, error) { return f.tip, nil }
+
+func (f *fakeNode) BalanceAfterConfirmations(_ context.Context, addr string, _ uint64) (uint64, error) {
+	return f.balances[addr], nil
 }
 
 type identity struct {
@@ -94,10 +103,16 @@ func newServer(t *testing.T, id identity) *httptest.Server {
 	cfg.Chains = map[string]config.ChainConfig{"waves": cc}
 	cfg.AllowedOrigins = []string{"https://genesis.hearth.tech"}
 
-	node := &fakeNode{histories: map[string][]json.RawMessage{
-		id.source: {depositTx(id.source, 100000000000, "3000000@1647216000000")},
-	}}
-	srv := httptest.NewServer(api.New(node, j, reg, cfg).Handler())
+	node := &fakeNode{
+		histories: map[string][]json.RawMessage{
+			id.source: {depositTx(id.source, 100000000000, "3000000@1647216000000")},
+		},
+		tip:      4000200,
+		balances: map[string]uint64{id.source: 100000000000},
+	}
+	adapters := map[string]chain.Adapter{"waves": &waves.Adapter{Primary: node}}
+	journals := map[string]*journal.Journal{"waves": j}
+	srv := httptest.NewServer(api.New(adapters, journals, reg, cfg).Handler())
 	t.Cleanup(srv.Close)
 	return srv
 }
@@ -172,6 +187,11 @@ func TestPreviewComputesLayersLive(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = respBad.Body.Close() })
 	assert.Equal(t, http.StatusBadRequest, respBad.StatusCode)
+
+	respUnknown, err := http.Get(srv.URL + "/api/preview/dogecoin/" + id.source)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = respUnknown.Body.Close() })
+	assert.Equal(t, http.StatusNotFound, respUnknown.StatusCode, "unknown chain lanes are 404")
 }
 
 func getJSON(t *testing.T, url string) map[string]any {

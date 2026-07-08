@@ -14,12 +14,10 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/wavesplatform/gowaves/pkg/proto"
-
 	"github.com/hearthchain/burning-page/internal/binding"
 	"github.com/hearthchain/burning-page/internal/bindings"
+	"github.com/hearthchain/burning-page/internal/chain"
 	"github.com/hearthchain/burning-page/internal/chain/chains"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/credit"
 	"github.com/hearthchain/burning-page/internal/evidence"
@@ -39,25 +37,24 @@ const (
 	chainWaves            = "waves"
 )
 
-// Node is the read surface the preview endpoint needs.
-type Node interface {
-	AllTransactions(ctx context.Context, addr string) ([]json.RawMessage, error)
-}
-
-// Server wires the endpoints to their dependencies.
+// Server wires the endpoints to their dependencies: one adapter and one
+// price journal per configured chain.
 type Server struct {
-	node       Node
-	journal    *journal.Journal
+	adapters   map[string]chain.Adapter
+	journals   map[string]*journal.Journal
 	registry   *bindings.Registry
 	cfg        config.Config
 	previewSem chan struct{}
 }
 
 // New builds a Server.
-func New(node Node, j *journal.Journal, reg *bindings.Registry, cfg config.Config) *Server {
+func New(
+	adapters map[string]chain.Adapter, journals map[string]*journal.Journal,
+	reg *bindings.Registry, cfg config.Config,
+) *Server {
 	return &Server{
-		node:       node,
-		journal:    j,
+		adapters:   adapters,
+		journals:   journals,
 		registry:   reg,
 		cfg:        cfg,
 		previewSem: make(chan struct{}, maxPreviewConcurrency),
@@ -70,7 +67,7 @@ var bindPage []byte
 // Handler returns the HTTP handler with all routes registered.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /api/preview/waves/{address}", s.preview)
+	mux.HandleFunc("GET /api/preview/{chain}/{address}", s.preview)
 	mux.HandleFunc("GET /api/address/{hearth}", s.address)
 	mux.HandleFunc("POST /api/bindings", s.postBinding)
 	mux.HandleFunc("GET /api/stats", s.stats)
@@ -82,14 +79,15 @@ func (s *Server) Handler() http.Handler {
 }
 
 func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
-	addr := r.PathValue("address")
-	parsed, err := proto.NewAddressFromString(addr)
-	if err != nil {
-		writeError(w, http.StatusBadRequest, "invalid_address", err.Error())
+	chainName := r.PathValue("chain")
+	adapter, ok := s.adapters[chainName]
+	if !ok {
+		writeError(w, http.StatusNotFound, "unknown_chain", "no such burn lane: "+chainName)
 		return
 	}
-	if ok, vErr := parsed.Valid(proto.MainNetScheme); vErr != nil || !ok {
-		writeError(w, http.StatusBadRequest, "invalid_address", "not a Waves mainnet address")
+	addr := r.PathValue("address")
+	if err := adapter.ValidateAddress(addr); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_address", err.Error())
 		return
 	}
 	select {
@@ -99,27 +97,32 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusTooManyRequests, "busy", "too many concurrent previews")
 		return
 	}
-	txs, err := s.node.AllTransactions(r.Context(), addr)
+	h, err := s.previewHistory(r.Context(), adapter, chainName, addr)
 	if err != nil {
 		writeError(w, http.StatusBadGateway, "node_error", err.Error())
 		return
 	}
-	deltas, status := waves.Deltas(txs, addr)
-	if status.Kind != "ok" {
+	if h.Status != chain.StatusOK {
+		writeError(w, http.StatusUnprocessableEntity, "unsupported_history", h.Reason+"; manual review")
+		return
+	}
+	deltas, status := adapter.Deltas(h.Txs, addr)
+	if status.Kind != chain.StatusOK {
 		writeError(w, http.StatusUnprocessableEntity, "unsupported_history", status.Reason+"; manual review")
 		return
 	}
+	deltas = chain.WithOpening(deltas, h.OpeningBaseUnits, h.OpeningAt)
 	profile, _, err := layers.Build(deltas, nil)
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "unsupported_history", err.Error())
 		return
 	}
-	units, err := chains.BaseUnits(chainWaves)
+	units, err := chains.BaseUnits(chainName)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "config_error", err.Error())
 		return
 	}
-	total, perLayer, err := credit.Compute(profile, s.journal, units)
+	total, perLayer, err := credit.Compute(profile, s.journals[chainName], units)
 	if err != nil {
 		writeError(w, http.StatusUnprocessableEntity, "unsupported_history", err.Error())
 		return
@@ -133,13 +136,35 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// previewHistory fetches the verified history at the freshest final state:
+// the reference is the finalized tip minus the confirmation depth, capped by
+// the window end when one is configured. The balance invariant runs here too,
+// so a preview can never show a figure the snapshot would refuse to credit.
+func (s *Server) previewHistory(
+	ctx context.Context, adapter chain.Adapter, chainName, addr string,
+) (chain.History, error) {
+	tip, err := adapter.Height(ctx)
+	if err != nil {
+		return chain.History{}, err
+	}
+	cc := s.cfg.Chains[chainName]
+	if tip <= cc.Confirmations {
+		return chain.History{}, fmt.Errorf("chain tip %d not past the confirmation depth", tip)
+	}
+	reference := tip - cc.Confirmations
+	if cc.Window.End > 0 && cc.Window.End < reference {
+		reference = cc.Window.End
+	}
+	return adapter.History(ctx, addr, reference, tip)
+}
+
 func (s *Server) address(w http.ResponseWriter, r *http.Request) {
 	hearth := r.PathValue("hearth")
 	if err := hearthaddr.Validate(hearth, s.cfg.HearthSchemeByte()); err != nil {
 		writeError(w, http.StatusBadRequest, "invalid_address", err.Error())
 		return
 	}
-	_, bundles, err := snapshot.Build(s.cfg.DataDir, map[string]*journal.Journal{chainWaves: s.journal}, s.cfg.HearthSchemeByte())
+	_, bundles, err := snapshot.Build(s.cfg.DataDir, s.journals, s.cfg.HearthSchemeByte())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "artifacts_error", err.Error())
 		return

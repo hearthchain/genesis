@@ -41,7 +41,9 @@ func TestStatsAggregatesCreditedBurns(t *testing.T) {
 	require.True(t, ok)
 	assert.Equal(t, float64(1), byStatus["confirmed"])
 
-	window, ok := got["window"].(map[string]any)
+	windows, ok := got["windows"].(map[string]any)
+	require.True(t, ok)
+	window, ok := windows["waves"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, float64(4000000), window["startHeight"])
 	assert.Equal(t, float64(4001000), window["endHeight"])
