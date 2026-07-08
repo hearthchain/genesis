@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth genesis burn · burn a fallen chain, light the new one</title>
+<meta name="description" content="The genesis distribution of Hearth (HRTH): burn coins of ten fallen L1 chains during the window, receive genesis credit priced at the best week you ever held through.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cg%20fill='none'%20stroke='%23C86F00'%20stroke-width='5'%20stroke-linecap='round'%3E%3Cpath%20d='M7%2013%20H57'/%3E%3Cpath%20d='M13%2013%20V55'/%3E%3Cpath%20d='M51%2013%20V55'/%3E%3Cpath%20d='M7%2055%20H57'/%3E%3C/g%3E%3Cpath%20fill='%23F7931A'%20d='M32%2026%20C26%2034%2022.8%2040%2026.2%2046.2%20A6.9%206.9%200%200%200%2037.8%2046.2%20C41.2%2040%2038%2034%2032%2026%20Z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/hearth.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="./">
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" style="flex: none; display: block;">
+        <g fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round">
+          <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+        </g>
+        <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+      </svg>
+      <span style="font-family: var(--serif); font-weight: normal; font-size: 1.25rem;">Hearth</span>
+      <span style="font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .12em; margin-top: 4px;">GENESIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="#chains">Burn</a>
+      <a href="a/">Cabinet</a>
+      <a href="disputes/">Disputes</a>
+      <a class="gh" href="https://hearth.tech">hearth.tech</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<!-- LIVE COUNTERS -->
+<section style="background: var(--panel);">
+  <div class="container section-pad">
+    <div class="glance">
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">Priced weight of burns, $</p>
+        <p class="stat" id="stat-usd">·</p>
+      </div>
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">HRTH at genesis, minimum</p>
+        <p class="stat" id="stat-credit">·</p>
+      </div>
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">WAVES burned</p>
+        <p class="stat" id="stat-burned">·</p>
+        <p class="stat-sub" id="stat-burned-sub"></p>
+      </div>
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">Hearth addresses credited</p>
+        <p class="stat" id="stat-participants">·</p>
+        <p class="stat-sub" id="stat-bindings-sub"></p>
+      </div>
+    </div>
+    <p class="micro" id="stat-root" style="margin-top: 28px; word-break: break-all;"></p>
+    <div class="notice" id="api-degraded" hidden style="margin-top: 28px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;">Live figures are temporarily unavailable. Every number on this site is recomputable from public chain data plus the published artifacts, so nothing is lost: check back shortly.</p>
+    </div>
+  </div>
+</section>
+
+<!-- THE CHAINS -->
+<section id="chains">
+  <div class="container section-pad" style="padding-top: 32px;">
+    <p class="label" style="text-align: center;">Start a burn · which chain do you hold?</p>
+    <div class="grid cols-3" style="margin-top: 24px;">
+      <a class="card" href="burn/waves/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Waves</p><span class="pill pill-solid">Live</span>
+        </div>
+        <p class="body">Plain transfer to a provably unspendable address. Preview, burn, and bind today.</p>
+        <span class="goto">burn/waves/ →</span>
+      </a>
+      <a class="card" href="burn/nem/">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">NEM</p><span class="pill pill-line">Planned</span>
+        </div>
+        <p class="body">Transfer to a provably unowned address; opens later in the window.</p>
+        <span class="goto">burn/nem/ →</span>
+      </a>
+      <a class="card" href="https://hearth.tech/#waitlist">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <p class="label">Your chain?</p><span class="pill pill-line">Vote</span>
+        </div>
+        <p class="body">Hold another fallen chain? Tell us which lane opens next.</p>
+        <span class="goto">hearth.tech →</span>
+      </a>
+    </div>
+    <p class="micro" style="text-align: center; margin: 26px 0 0;">Burn window: August–September 2026 (provisional, final dates announced here in advance) · Mainnet: October 2026 · Never burn straight from an exchange; withdraw to your own address first.</p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">How it works</p>
+      <h2 class="h2">Four steps, none of them an account.</h2>
+      <p class="sec-intro">No registration, no custody, no personal data. The site never touches keys and never accepts funds; every signature happens in your own wallet.</p>
+    </div>
+    <div class="grid cols-2">
+      <div class="card">
+        <p class="label">01 · Get a Hearth address</p>
+        <p class="body">Generate a Hearth address locally with the open-source console tooling in the <a href="https://github.com/hearthchain/burning-page">repository</a>. It is a new format: it cannot be derived from your old keys, and its seed never leaves your machine. In-browser generation ships before the window opens.</p>
+      </div>
+      <div class="card">
+        <p class="label">02 · Bind your source address</p>
+        <p class="body">In the cabinet, sign one short statement with the wallet of the address you will burn from. That binds every burn from that source to your Hearth address. We never ask for a seed phrase; signing happens only inside your wallet extension.</p>
+      </div>
+      <div class="card">
+        <p class="label">03 · Burn</p>
+        <p class="body">Send a plain transfer to the published burn address of the chain: no memo, no payload, any amount, any time before the window closes. The burn address is provably unspendable; the coins are gone for good.</p>
+      </div>
+      <div class="card">
+        <p class="label">04 · Watch it confirm</p>
+        <p class="body">Watchers on two independent public nodes pick the burn up within minutes. It shows in your cabinet immediately, and is credited once it reaches confirmation depth and both nodes agree.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FORMULA -->
+<section style="background: var(--panel);">
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Crediting</p>
+      <h2 class="h2">Priced at the best week you held through.</h2>
+    </div>
+    <div class="notice" style="margin: 40px auto 0; max-width: 640px; padding: 22px 26px;">
+      <p class="label">The formula</p>
+      <p style="font-size: .92rem; line-height: 1.65; margin: 12px 0 0;">Credit = amount burned × the coin's highest weekly average price over the period you continuously held it, from a published CoinMarketCap-based price log. Your history is split into layers by minimum balance: each top-up starts a new layer with its own date, each sale shaves layers down. Held through the whole fall: credited near the top. Bought recently: credited at recent prices. 1 credit = 1 HRTH.</p>
+      <p style="font-family: var(--mono); font-size: .8rem; line-height: 1.8; color: var(--muted); margin: 14px 0 0;">1,000 WAVES held since March 2022 → peak week $49.71 → 49,710 HRTH<br>the same 1,000 WAVES bought in early 2024 → $4.00 → 4,000 HRTH</p>
+    </div>
+    <p style="text-align: center; font-size: .9rem; color: var(--muted); max-width: 640px; margin: 26px auto 0; line-height: 1.65;">Until the snapshot freezes, the figure is a minimum: the best-week price can only grow. The published rule is integer arithmetic with truncation, so anyone can recompute every credit to the last digit.</p>
+    <p class="micro" style="text-align: center; max-width: 640px; margin: 18px auto 0;">Trust the files, not the site: the burn log, binding registry, price journal, and snapshot with its Merkle root are published as append-only artifacts with a reproduction script, from the <a href="https://github.com/hearthchain/burning-page">pipeline repository</a>.</p>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="container" style="position: relative; z-index: 1; text-align: center; padding-top: 60px; padding-bottom: 96px;">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true" style="display: block; margin: 0 auto;">
+      <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+        <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+      </g>
+      <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+    </svg>
+    <p style="font-family: var(--serif); font-size: 1.2rem; margin: 12px 0 0;">Hearth genesis</p>
+    <p class="micro" style="max-width: 620px; margin: 16px auto 0;">Credit converts to HRTH one to one by the published formula. Loyalty to a fallen chain converts into a share of the new network. The starting supply is floating: the sum of all credited burns plus the published team and treasury share, so turnout sets it. Credit is not compensation, promises no dollar value, and implies no price floor for HRTH.</p>
+    <nav aria-label="Footer" style="display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; font-size: .88rem; margin-top: 22px;">
+      <a href="https://hearth.tech" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">hearth.tech</a>
+      <a href="https://github.com/hearthchain/burning-page" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">GitHub</a>
+      <a href="disputes/" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">Disputes</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/stats.js"></script>
+</body>
+</html>

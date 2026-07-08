@@ -19,7 +19,7 @@ Single Go monorepo. First chain is Waves; the other nine plug in later through t
 - `internal/layers`: min-balance layer profile from transfer history
 - `internal/journal`: canonical weekly price journal (imported artifact, weekly averages of daily closes)
 - `internal/bindings`: registry of source-address to Hearth-address bindings
-- `web/`: static HTML plus a little TypeScript for wallet integration and client-side Hearth address generation; five pages per the site map: `/`, `/a/<address>`, `/burn`, `/burn/<chain>`, `/disputes`
+- `web/`: static vanilla HTML/CSS/JS, no build step, no external resources; five pages per the site map: `/`, `/a/` (cabinet, address in the query string), `/burn`, `/burn/<chain>`, `/disputes`; in-browser Hearth address generation is a wave-2 item
 
 Storage is append-only JSONL artifacts plus in-memory indexes rebuilt on start; no database (see [`docs/architecture.md`](docs/architecture.md)).
 
@@ -32,9 +32,13 @@ The burn itself is a plain transfer to the published burn address, with no paylo
 1. Foundation: price-journal artifact, published burn address, binding message format.
 2. Watcher: mainnet burn detection, history, layers, double-source cross-check against two independent public nodes, golden tests on recorded fixtures.
 3. Credit engine, evidence bundles, bindings registry, snapshot with Merkle root, read/preview API.
-4. Web: front page with live counters, address cabinet, `/burn/waves` constructor, binding submission (out of scope for the current plan).
+4. Web: front page with live counters, address cabinet, `/burn/waves` constructor, binding submission.
 
 Milestones 1-3 are specified in [`docs/architecture.md`](docs/architecture.md). Wave-2 chains follow via the adapter interface.
+
+## Deploying the site
+
+`.github/workflows/pages.yml` deploys `web/` to GitHub Pages on every push to `develop` that touches `web/**` (plus manual dispatch). One-time repo settings, not covered by the workflow: set the custom domain `genesis.hearth.tech` in Settings → Pages (with Actions deploys the `web/CNAME` file alone does not apply it), allow `develop` in the `github-pages` environment's deployment-branch rules, and point DNS (`genesis` CNAME to `hearthchain.github.io`) when going live; HTTPS provisions only after DNS resolves. The frontend's API base is the single constant in `web/assets/js/config.js` (empty = same-origin `/api`); until the API is publicly hosted the site degrades to placeholders gracefully.
 
 ## Development
 

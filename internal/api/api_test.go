@@ -90,6 +90,7 @@ func newServer(t *testing.T, id identity) *httptest.Server {
 	cfg.DataDir = dataDir
 	cfg.HearthScheme = "H"
 	cfg.Window = chain.Window{Start: 4000000, End: 4001000}
+	cfg.AllowedOrigins = []string{"https://genesis.hearth.tech"}
 
 	node := &fakeNode{histories: map[string][]json.RawMessage{
 		id.source: {depositTx(id.source, 100000000000, "3000000@1647216000000")},

@@ -82,6 +82,13 @@ func (r *Registry) HearthFor(source string) (string, bool) {
 	return rec.Hearth, ok
 }
 
+// Count reports how many source addresses currently hold a binding.
+func (r *Registry) Count() int {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return len(r.bySource)
+}
+
 // SourcesFor lists the source addresses currently bound to a Hearth address.
 func (r *Registry) SourcesFor(hearth string) []string {
 	r.mu.RLock()

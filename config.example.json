@@ -12,5 +12,6 @@
   "dataDir": "data",
   "journalCSV": "data/journal/waves.csv",
   "listenAddr": ":8080",
-  "hearthScheme": "H"
+  "hearthScheme": "H",
+  "allowedOrigins": ["https://genesis.hearth.tech"]
 }

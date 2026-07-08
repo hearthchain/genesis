@@ -49,7 +49,7 @@ two public Waves nodes (independent REST endpoints)
   cmd/snapshot            cmd/api
 ```
 
-`cmd/snapshot` runs layers -> credits -> evidence bundles -> Merkle root, and its `--verify` mode recomputes everything from the artifacts and compares roots. `cmd/api` loads the artifacts into memory and serves GET `/api/preview/waves/<address>` (live fetch plus layer computation), GET `/api/address/<hearth-address>`, and POST `/api/bindings`. `internal/journal` loads the published weekly price CSV artifact.
+`cmd/snapshot` runs layers -> credits -> evidence bundles -> Merkle root, and its `--verify` mode recomputes everything from the artifacts and compares roots. `cmd/api` loads the artifacts into memory and serves GET `/api/preview/waves/<address>` (live fetch plus layer computation), GET `/api/address/<hearth-address>`, GET `/api/stats` (front-page counters: per-chain burn totals, participants, total credit), and POST `/api/bindings`. CORS is answered only for the origins listed in `allowedOrigins` (empty list = no CORS headers). `internal/journal` loads the published weekly price CSV artifact.
 
 ## 5. Data layer
 

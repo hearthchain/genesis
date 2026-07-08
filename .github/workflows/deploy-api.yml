@@ -1,0 +1,57 @@
+name: deploy-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "cmd/**"
+      - "internal/**"
+      - "go.mod"
+      - "go.sum"
+      - "vendor/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-api
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # Skipped until the repo variable DEPLOY_HOST is set, so the workflow is
+    # inert on forks and before the server exists.
+    if: vars.DEPLOY_HOST != ''
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.26.2"
+      - name: Build linux binaries
+        run: GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -mod=vendor -trimpath -ldflags "-s -w -buildid=" -o bin/ ./cmd/...
+      - name: Install the deploy key
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/id_deploy"
+          chmod 600 "$HOME/.ssh/id_deploy"
+      - name: Upload binaries and restart services
+        env:
+          HOST: ${{ vars.DEPLOY_HOST }}
+          SSH_USER: ${{ vars.DEPLOY_USER }}
+        run: |
+          set -eu
+          opts="-i $HOME/.ssh/id_deploy -o StrictHostKeyChecking=accept-new"
+          ssh $opts "$SSH_USER@$HOST" 'mkdir -p /opt/hearth/bin.new'
+          scp $opts bin/api bin/watcher bin/snapshot bin/bindsign "$SSH_USER@$HOST:/opt/hearth/bin.new/"
+          ssh $opts "$SSH_USER@$HOST" 'set -eu
+            mkdir -p /opt/hearth/bin
+            mv -f /opt/hearth/bin.new/* /opt/hearth/bin/
+            sudo systemctl restart hearth-api hearth-watcher
+            sleep 2
+            systemctl is-active hearth-api hearth-watcher
+            curl -fsS http://localhost:8080/api/stats > /dev/null'

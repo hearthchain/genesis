@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth genesis · disputes</title>
+<meta name="description" content="How to contest a credit before the snapshot freezes: what mismatch and manual review mean, and how to submit counter-evidence.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cg%20fill='none'%20stroke='%23C86F00'%20stroke-width='5'%20stroke-linecap='round'%3E%3Cpath%20d='M7%2013%20H57'/%3E%3Cpath%20d='M13%2013%20V55'/%3E%3Cpath%20d='M51%2013%20V55'/%3E%3Cpath%20d='M7%2055%20H57'/%3E%3C/g%3E%3Cpath%20fill='%23F7931A'%20d='M32%2026%20C26%2034%2022.8%2040%2026.2%2046.2%20A6.9%206.9%200%200%200%2037.8%2046.2%20C41.2%2040%2038%2034%2032%2026%20Z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/hearth.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="../">
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" style="flex: none; display: block;">
+        <g fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round">
+          <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+        </g>
+        <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+      </svg>
+      <span style="font-family: var(--serif); font-weight: normal; font-size: 1.25rem;">Hearth</span>
+      <span style="font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .12em; margin-top: 4px;">GENESIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="../#chains">Burn</a>
+      <a href="../a/">Cabinet</a>
+      <a href="./">Disputes</a>
+      <a class="gh" href="https://hearth.tech">hearth.tech</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<section>
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Disputes</p>
+      <h2 class="h2">Every figure can be argued with. Here is how.</h2>
+      <p class="sec-intro">The backend is a cache, never an authority: every credit is recomputable from the published artifacts. If your recomputation disagrees with ours, the artifacts are what we argue over, and the dispute window exists exactly for that.</p>
+    </div>
+
+    <div class="grid cols-2">
+      <div class="card">
+        <p class="label">When a burn says mismatch</p>
+        <p class="body">Every burn is cross-checked against two independent public nodes. <span class="pill pill-err">mismatch</span> means the nodes disagreed about the transaction; the burn is parked for manual review and is not credited until the disagreement is resolved. No action is needed from you unless it stays mismatched for more than a day.</p>
+      </div>
+      <div class="card">
+        <p class="label">When an address is blocked</p>
+        <p class="body">The MVP prices histories made of plain transfers. An address whose history contains anything else (leases, DEX trades, invokes) is blocked to manual review instead of risking a wrong credit. Blocked addresses are listed in the snapshot's <span class="addr">blockedSources</span>; each is resolved by hand before the freeze.</p>
+      </div>
+      <div class="card">
+        <p class="label">Contesting a credit</p>
+        <p class="body">Open an issue on the <a href="https://github.com/hearthchain/burning-page/issues">repository</a> with the transaction ids, the addresses involved, and what you believe the correct figure is, ideally with the output of the published reproduction script. Disputes are accepted until the snapshot freezes; the frozen Merkle root is final.</p>
+      </div>
+      <div class="card">
+        <p class="label">Proving an address is yours</p>
+        <p class="body">Control is proven the same way bindings work: by signing a challenge statement with the address's own key, in your wallet or with the <span class="addr">bindsign</span> CLI. We never ask for seed phrases; anyone who does is not us.</p>
+      </div>
+    </div>
+
+    <div class="notice" style="margin: 40px auto 0; max-width: 640px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;"><strong>Burned from an exchange by mistake?</strong> A withdrawal sent straight from an exchange to the burn address credits the exchange's blacklisted address, not you, and signing a challenge cannot fix that: the exchange owns the key. This is the one case the dispute window cannot help with; it is why every page says to withdraw first.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="container" style="position: relative; z-index: 1; text-align: center; padding-top: 60px; padding-bottom: 96px;">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true" style="display: block; margin: 0 auto;">
+      <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+        <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+      </g>
+      <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+    </svg>
+    <p style="font-family: var(--serif); font-size: 1.2rem; margin: 12px 0 0;">Hearth genesis</p>
+    <p class="micro" style="max-width: 620px; margin: 16px auto 0;">Credit converts to HRTH one to one by the published formula. Loyalty to a fallen chain converts into a share of the new network. The starting supply is floating: the sum of all credited burns plus the published team and treasury share, so turnout sets it. Credit is not compensation, promises no dollar value, and implies no price floor for HRTH.</p>
+    <nav aria-label="Footer" style="display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; font-size: .88rem; margin-top: 22px;">
+      <a href="https://hearth.tech" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">hearth.tech</a>
+      <a href="https://github.com/hearthchain/burning-page" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">GitHub</a>
+      <a href="./" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">Disputes</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

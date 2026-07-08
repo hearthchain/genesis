@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hearth genesis · cabinet</title>
+<meta name="description" content="Your Hearth cabinet: accumulated genesis credit and the burn history bound to your address. The address is the cabinet, no registration.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Cg%20fill='none'%20stroke='%23C86F00'%20stroke-width='5'%20stroke-linecap='round'%3E%3Cpath%20d='M7%2013%20H57'/%3E%3Cpath%20d='M13%2013%20V55'/%3E%3Cpath%20d='M51%2013%20V55'/%3E%3Cpath%20d='M7%2055%20H57'/%3E%3C/g%3E%3Cpath%20fill='%23F7931A'%20d='M32%2026%20C26%2034%2022.8%2040%2026.2%2046.2%20A6.9%206.9%200%200%200%2037.8%2046.2%20C41.2%2040%2038%2034%2032%2026%20Z'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/hearth.css">
+</head>
+<body>
+
+<header class="site">
+  <nav class="nav" aria-label="Main">
+    <a class="wordmark" href="../">
+      <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden="true" style="flex: none; display: block;">
+        <g fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round">
+          <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+        </g>
+        <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+      </svg>
+      <span style="font-family: var(--serif); font-weight: normal; font-size: 1.25rem;">Hearth</span>
+      <span style="font-family: var(--mono); font-size: .66rem; color: var(--muted); letter-spacing: .12em; margin-top: 4px;">GENESIS</span>
+    </a>
+    <div class="nav-links">
+      <a href="../#chains">Burn</a>
+      <a href="./">Cabinet</a>
+      <a href="../disputes/">Disputes</a>
+      <a class="gh" href="https://hearth.tech">hearth.tech</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+<section id="cab-form">
+  <div class="container section-pad">
+    <div class="sec-head">
+      <p class="label">Cabinet</p>
+      <h2 class="h2">Your address is your cabinet.</h2>
+      <p class="sec-intro">Paste a Hearth address to see its accumulated credit and burn history. No registration, no cookies, no keys: the URL is the whole session, bookmark it.</p>
+    </div>
+    <form class="form-row" id="cab-open-form" style="max-width: 560px; margin-left: auto; margin-right: auto;">
+      <label class="visually-hidden" for="cab-input" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Hearth address</label>
+      <input id="cab-input" placeholder="3H..." autocomplete="off" spellcheck="false">
+      <button class="btn btn-primary" type="submit">Open cabinet</button>
+    </form>
+    <p class="micro" style="text-align: center; margin-top: 18px;">No Hearth address yet? Generate one locally with the console tooling in the <a href="https://github.com/hearthchain/burning-page">repository</a>; in-browser generation ships before the window opens.</p>
+    <div class="result err" id="cab-error" hidden style="max-width: 560px; margin: 20px auto 0;"></div>
+  </div>
+</section>
+
+<section id="cab-view" hidden>
+  <div class="container section-pad">
+    <p class="label">Cabinet</p>
+    <p class="addr" id="cab-addr" style="font-size: .95rem; margin: 12px 0 0;"></p>
+    <div class="glance" style="margin-top: 36px; grid-template-columns: repeat(2, 1fr);">
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">Minimum credit</p>
+        <p class="stat" id="cab-credit">·</p>
+        <p class="stat-sub">In HRTH at genesis. Until the snapshot freezes, the figure is a minimum: the best-week price can only grow.</p>
+      </div>
+      <div class="glance-item">
+        <p class="label" style="font-size: .66rem;">Bound source addresses</p>
+        <div id="cab-bindings" class="micro" style="margin-top: 8px; word-break: break-all;"></div>
+        <p class="stat-sub" style="margin-top: 12px;"><a id="cab-bind-link" href="../burn/waves/#bind">Bind a Waves address to this cabinet →</a></p>
+      </div>
+    </div>
+
+    <h3 class="label" style="margin-top: 52px;">Burns</h3>
+    <p class="micro" id="cab-noburns" hidden style="margin-top: 12px;">No burns bound to this address yet. Burns appear here within minutes of hitting the chain.</p>
+    <div class="table-wrap" id="cab-burns-wrap" style="margin-top: 16px;">
+      <table>
+        <thead>
+          <tr><th>Tx</th><th>Chain</th><th>Source</th><th class="num">Amount</th><th class="num">Height</th><th class="num">Credit, HRTH</th><th>Status</th></tr>
+        </thead>
+        <tbody id="cab-burns"></tbody>
+      </table>
+    </div>
+    <p class="micro" style="margin-top: 16px;">Statuses: <span class="pill pill-line">pending_confirmations</span> waiting for depth · <span class="pill pill-line">pending_crosscheck</span> waiting for the second node · <span class="pill pill-ok">confirmed</span> credited · <span class="pill pill-err">mismatch</span> the two nodes disagree, under manual review, see <a href="../disputes/">disputes</a>.</p>
+    <div class="notice" id="api-degraded" hidden style="margin-top: 28px; padding: 18px 22px;">
+      <p style="margin: 0; font-size: .9rem; line-height: 1.6;">The cabinet is temporarily unavailable. Nothing is lost: every figure is recomputable from public chain data plus the published artifacts. Check back shortly.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-glow" aria-hidden="true"></div>
+  <div class="container" style="position: relative; z-index: 1; text-align: center; padding-top: 60px; padding-bottom: 96px;">
+    <svg viewBox="0 0 64 64" width="30" height="30" aria-hidden="true" style="display: block; margin: 0 auto;">
+      <g fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+        <path d="M7 13 H57"></path><path d="M13 13 V55"></path><path d="M51 13 V55"></path><path d="M7 55 H57"></path>
+      </g>
+      <path fill="var(--fire)" d="M32 26 C26 34 22.8 40 26.2 46.2 A6.9 6.9 0 0 0 37.8 46.2 C41.2 40 38 34 32 26 Z"></path>
+    </svg>
+    <p style="font-family: var(--serif); font-size: 1.2rem; margin: 12px 0 0;">Hearth genesis</p>
+    <p class="micro" style="max-width: 620px; margin: 16px auto 0;">Credit converts to HRTH one to one by the published formula. Loyalty to a fallen chain converts into a share of the new network. The starting supply is floating: the sum of all credited burns plus the published team and treasury share, so turnout sets it. Credit is not compensation, promises no dollar value, and implies no price floor for HRTH.</p>
+    <nav aria-label="Footer" style="display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; font-size: .88rem; margin-top: 22px;">
+      <a href="https://hearth.tech" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">hearth.tech</a>
+      <a href="https://github.com/hearthchain/burning-page" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">GitHub</a>
+      <a href="../disputes/" style="color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--hair-strong);">Disputes</a>
+    </nav>
+  </div>
+</footer>
+
+<script src="../assets/js/config.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/cabinet.js"></script>
+</body>
+</html>

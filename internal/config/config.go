@@ -22,6 +22,9 @@ type Config struct {
 	JournalCSV    string       `json:"journalCSV"`
 	ListenAddr    string       `json:"listenAddr"`
 	HearthScheme  string       `json:"hearthScheme"`
+	// AllowedOrigins lists the web origins the API answers CORS for; empty
+	// means no CORS headers (same-origin deployments need none).
+	AllowedOrigins []string `json:"allowedOrigins"`
 }
 
 // HearthSchemeByte returns the Hearth address scheme byte.

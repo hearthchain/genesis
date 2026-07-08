@@ -89,6 +89,22 @@ func TestLatestBindingWins(t *testing.T) {
 	assert.Empty(t, reg.SourcesFor(first.Hearth), "the replaced hearth loses the source")
 }
 
+func TestCountReportsBoundSources(t *testing.T) {
+	reg, err := bindings.Load(filepath.Join(t.TempDir(), "b.jsonl"), 'H')
+	require.NoError(t, err)
+	assert.Equal(t, 0, reg.Count())
+
+	require.NoError(t, reg.Add(signedRecord(t, "seed one", "hearth one")))
+	assert.Equal(t, 1, reg.Count())
+
+	// Rebinding the same source replaces, not adds.
+	require.NoError(t, reg.Add(signedRecord(t, "seed one", "hearth replacement")))
+	assert.Equal(t, 1, reg.Count())
+
+	require.NoError(t, reg.Add(signedRecord(t, "seed two", "hearth two")))
+	assert.Equal(t, 2, reg.Count())
+}
+
 func keeperSignedRecord(t *testing.T, seed, hearthSeed string) bindings.Record {
 	t.Helper()
 	rec := signedRecord(t, seed, hearthSeed)
