@@ -29,7 +29,12 @@ func run() int {
 		slog.Error("config", "err", err)
 		return 1
 	}
-	j, err := journal.Load(cfg.JournalCSV)
+	wavesCfg, ok := cfg.Chains["waves"]
+	if !ok {
+		slog.Error("config", "err", "no waves chain block")
+		return 1
+	}
+	j, err := journal.Load(wavesCfg.JournalCSV)
 	if err != nil {
 		slog.Error("journal", "err", err)
 		return 1
@@ -43,7 +48,7 @@ func run() int {
 	if *fixture != "" {
 		node = waves.NewFileNode(*fixture)
 	} else {
-		node = waves.NewClient(cfg.Nodes.Primary)
+		node = waves.NewClient(wavesCfg.Nodes.Primary)
 	}
 
 	srv := &http.Server{

@@ -45,7 +45,7 @@ func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
 		"pendingSources":   len(snap.PendingSources),
 		"blockedSources":   len(snap.BlockedSources),
 		"chains":           chains,
-		"window":           s.cfg.Window,
+		"window":           s.cfg.Chains[chainWaves].Window,
 	})
 }
 

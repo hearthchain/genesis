@@ -24,12 +24,15 @@ func run() int {
 		slog.Error("config", "err", err)
 		return 1
 	}
-	j, err := journal.Load(cfg.JournalCSV)
-	if err != nil {
-		slog.Error("journal", "err", err)
-		return 1
+	journals := map[string]*journal.Journal{}
+	for name, cc := range cfg.Chains {
+		j, jErr := journal.Load(cc.JournalCSV)
+		if jErr != nil {
+			slog.Error("journal", "chain", name, "err", jErr)
+			return 1
+		}
+		journals[name] = j
 	}
-	journals := map[string]*journal.Journal{"waves": j}
 
 	if *verify {
 		if vErr := snapshot.Verify(cfg.DataDir, journals, cfg.HearthSchemeByte()); vErr != nil {

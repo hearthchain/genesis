@@ -1,16 +1,20 @@
 {
-  "nodes": {
-    "primary": "https://nodes.wavesnodes.com",
-    "secondary": "https://nodes.wx.network"
+  "chains": {
+    "waves": {
+      "nodes": {
+        "primary": "https://nodes.wavesnodes.com",
+        "secondary": "https://nodes.wx.network"
+      },
+      "burnAddress": "3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1",
+      "window": {
+        "startHeight": 0,
+        "endHeight": 0
+      },
+      "confirmations": 100,
+      "journalCSV": "data/journal/waves.csv"
+    }
   },
-  "burnAddress": "3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1",
-  "window": {
-    "startHeight": 0,
-    "endHeight": 0
-  },
-  "confirmations": 100,
   "dataDir": "data",
-  "journalCSV": "data/journal/waves.csv",
   "listenAddr": ":8080",
   "hearthScheme": "H",
   "allowedOrigins": ["https://genesis.hearth.tech"]

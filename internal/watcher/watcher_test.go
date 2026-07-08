@@ -90,27 +90,22 @@ func testAdapter(node *fakeNode) *waves.Adapter {
 	return &waves.Adapter{Primary: node, Secondary: node, BurnAddress: burnAddr}
 }
 
-func testConfig(t *testing.T) config.Config {
-	t.Helper()
-	var cfg config.Config
-	cfg.Nodes.Primary = "fake"
-	cfg.Nodes.Secondary = "fake"
-	cfg.BurnAddress = burnAddr
-	cfg.Window = chain.Window{Start: 4000000, End: 4001000}
-	cfg.Confirmations = 100
-	cfg.DataDir = t.TempDir()
-	cfg.HearthScheme = "H"
-	return cfg
+func testChainConfig() config.ChainConfig {
+	var cc config.ChainConfig
+	cc.BurnAddress = burnAddr
+	cc.Window = chain.Window{Start: 4000000, End: 4001000}
+	cc.Confirmations = 100
+	return cc
 }
 
 func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
-	w := &watcher.Watcher{Adapter: testAdapter(node), Cfg: cfg}
+	dataDir := t.TempDir()
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 
 	require.NoError(t, w.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	require.Len(t, records, 3)
 	byID := map[string]watcher.BurnRecord{}
@@ -123,14 +118,14 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 	assert.Equal(t, "pending_confirmations", byID["FreshBurn9999"].Status,
 		"a fresh burn is visible immediately, credit waits for maturity")
 
-	aliceMeta, _, err := store.ReadTransfers(filepath.Join(cfg.DataDir, "transfers", "waves", alice+".jsonl"))
+	aliceMeta, _, err := store.ReadTransfers(filepath.Join(dataDir, "transfers", "waves", alice+".jsonl"))
 	require.NoError(t, err)
 	assert.Equal(t, "ok", aliceMeta.Status)
 	assert.Equal(t, "waves", aliceMeta.Chain)
 	assert.Equal(t, int64(99900000), aliceMeta.Recomputed)
 	assert.Equal(t, uint64(99900000), aliceMeta.NodeBalance)
 
-	carolMeta, _, err := store.ReadTransfers(filepath.Join(cfg.DataDir, "transfers", "waves", carol+".jsonl"))
+	carolMeta, _, err := store.ReadTransfers(filepath.Join(dataDir, "transfers", "waves", carol+".jsonl"))
 	require.NoError(t, err)
 	assert.Equal(t, "unsupported", carolMeta.Status)
 	assert.Contains(t, carolMeta.Reason, "type 8")
@@ -138,34 +133,34 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 
 func TestPollIsIdempotentAcrossRestarts(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
+	dataDir := t.TempDir()
 
-	w := &watcher.Watcher{Adapter: testAdapter(node), Cfg: cfg}
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w.Poll(t.Context()))
 
 	// A fresh watcher over the same data dir must not duplicate anything.
-	w2 := &watcher.Watcher{Adapter: testAdapter(node), Cfg: cfg}
+	w2 := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w2.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	assert.Len(t, records, 3, "rescan must skip already-recorded states")
 
-	entries, err := os.ReadDir(filepath.Join(cfg.DataDir, "transfers", "waves"))
+	entries, err := os.ReadDir(filepath.Join(dataDir, "transfers", "waves"))
 	require.NoError(t, err)
 	assert.Len(t, entries, 2)
 }
 
 func TestPendingBurnUpgradesWhenMature(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
-	w := &watcher.Watcher{Adapter: testAdapter(node), Cfg: cfg}
+	dataDir := t.TempDir()
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w.Poll(t.Context()))
 
 	node.tip = 4000300 // FreshBurn9999 at 4000150 now has >100 confirmations
 	require.NoError(t, w.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	latest := map[string]string{}
 	for _, r := range records {

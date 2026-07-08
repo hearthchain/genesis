@@ -89,7 +89,9 @@ func newServer(t *testing.T, id identity) *httptest.Server {
 	var cfg config.Config
 	cfg.DataDir = dataDir
 	cfg.HearthScheme = "H"
-	cfg.Window = chain.Window{Start: 4000000, End: 4001000}
+	var cc config.ChainConfig
+	cc.Window = chain.Window{Start: 4000000, End: 4001000}
+	cfg.Chains = map[string]config.ChainConfig{"waves": cc}
 	cfg.AllowedOrigins = []string{"https://genesis.hearth.tech"}
 
 	node := &fakeNode{histories: map[string][]json.RawMessage{

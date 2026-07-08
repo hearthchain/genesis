@@ -9,19 +9,28 @@ import (
 	"github.com/hearthchain/burning-page/internal/chain"
 )
 
-// Config is the shared runtime configuration; see config.example.json.
-type Config struct {
+// ChainConfig is the per-chain block of the shared config: which public
+// sources feed the watcher and where the burn campaign runs.
+type ChainConfig struct {
 	Nodes struct {
 		Primary   string `json:"primary"`
 		Secondary string `json:"secondary"`
 	} `json:"nodes"`
+	// HistoryAPI is the account-history source on chains whose node API has
+	// none (the Hyperion base URL on EOS); empty where nodes serve history.
+	HistoryAPI    string       `json:"historyAPI,omitempty"`
 	BurnAddress   string       `json:"burnAddress"`
 	Window        chain.Window `json:"window"`
 	Confirmations uint64       `json:"confirmations"`
-	DataDir       string       `json:"dataDir"`
 	JournalCSV    string       `json:"journalCSV"`
-	ListenAddr    string       `json:"listenAddr"`
-	HearthScheme  string       `json:"hearthScheme"`
+}
+
+// Config is the shared runtime configuration; see config.example.json.
+type Config struct {
+	Chains       map[string]ChainConfig `json:"chains"`
+	DataDir      string                 `json:"dataDir"`
+	ListenAddr   string                 `json:"listenAddr"`
+	HearthScheme string                 `json:"hearthScheme"`
 	// AllowedOrigins lists the web origins the API answers CORS for; empty
 	// means no CORS headers (same-origin deployments need none).
 	AllowedOrigins []string `json:"allowedOrigins"`
@@ -42,8 +51,15 @@ func Load(path string) (Config, error) {
 	if uErr := json.Unmarshal(raw, &cfg); uErr != nil {
 		return cfg, fmt.Errorf("config: %s: %w", path, uErr)
 	}
-	if cfg.Nodes.Primary == "" || cfg.Nodes.Secondary == "" || cfg.BurnAddress == "" {
-		return cfg, fmt.Errorf("config: %s: nodes.primary, nodes.secondary and burnAddress are required", path)
+	if len(cfg.Chains) == 0 {
+		return cfg, fmt.Errorf("config: %s: at least one chains block is required", path)
+	}
+	for name, cc := range cfg.Chains {
+		if cc.Nodes.Primary == "" || cc.Nodes.Secondary == "" || cc.BurnAddress == "" || cc.JournalCSV == "" {
+			return cfg, fmt.Errorf(
+				"config: %s: chain %s: nodes.primary, nodes.secondary, burnAddress and journalCSV are required",
+				path, name)
+		}
 	}
 	if len(cfg.HearthScheme) != 1 {
 		return cfg, fmt.Errorf("config: %s: hearthScheme must be exactly one byte", path)

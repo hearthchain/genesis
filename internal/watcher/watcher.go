@@ -29,8 +29,9 @@ type BurnRecord struct {
 
 // Watcher polls one chain for burns through its adapter.
 type Watcher struct {
-	Adapter chain.Adapter
-	Cfg     config.Config
+	Adapter  chain.Adapter
+	ChainCfg config.ChainConfig
+	DataDir  string
 }
 
 // Poll performs one full-window pass.
@@ -39,10 +40,10 @@ func (w *Watcher) Poll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if tip <= w.Cfg.Confirmations {
+	if tip <= w.ChainCfg.Confirmations {
 		return nil
 	}
-	burns, err := w.Adapter.BurnCandidates(ctx, w.Cfg.Window)
+	burns, err := w.Adapter.BurnCandidates(ctx, w.ChainCfg.Window)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func (w *Watcher) Poll(ctx context.Context) error {
 	return nil
 }
 
-func (w *Watcher) burnsPath() string { return filepath.Join(w.Cfg.DataDir, "burns.jsonl") }
+func (w *Watcher) burnsPath() string { return filepath.Join(w.DataDir, "burns.jsonl") }
 
 func (w *Watcher) latestRecords() (map[string]BurnRecord, error) {
 	records, err := store.ReadJSONL[BurnRecord](w.burnsPath())
@@ -77,7 +78,7 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 	if seen && (prev.Status == "confirmed" || prev.Status == "mismatch") {
 		return nil
 	}
-	if b.Height+w.Cfg.Confirmations > tip {
+	if b.Height+w.ChainCfg.Confirmations > tip {
 		if seen {
 			return nil // already visible as pending; nothing changed
 		}
@@ -88,7 +89,7 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 		slog.Info("burn recorded", "txId", b.TxID, "source", b.Source, "amount", b.Amount, "status", rec.Status)
 		return nil
 	}
-	verdict, err := w.Adapter.CrossCheck(ctx, b, w.Cfg.Confirmations)
+	verdict, err := w.Adapter.CrossCheck(ctx, b, w.ChainCfg.Confirmations)
 	if err != nil {
 		return err
 	}
@@ -109,11 +110,11 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 // ensureHistory fetches, verifies and persists the transfer history of a
 // source address once; the artifact is the credit formula's input.
 func (w *Watcher) ensureHistory(ctx context.Context, source string, tip uint64) error {
-	path := filepath.Join(w.Cfg.DataDir, "transfers", w.Adapter.Name(), source+".jsonl")
+	path := filepath.Join(w.DataDir, "transfers", w.Adapter.Name(), source+".jsonl")
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	}
-	reference := min(w.Cfg.Window.End, tip-w.Cfg.Confirmations)
+	reference := min(w.ChainCfg.Window.End, tip-w.ChainCfg.Confirmations)
 	h, err := w.Adapter.History(ctx, source, reference, tip)
 	if err != nil {
 		return err
