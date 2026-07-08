@@ -19,8 +19,12 @@ type TransferMeta struct {
 	ReferenceHeight uint64    `json:"referenceHeight"`
 	NodeBalance     uint64    `json:"nodeBalanceBaseUnits"`
 	Recomputed      int64     `json:"recomputedBaseUnits"`
-	Status          string    `json:"status"`
-	Reason          string    `json:"reason,omitempty"`
+	// OpeningBaseUnits and OpeningAt describe the synthetic opening layer of
+	// a truncated public history; zero means complete from genesis.
+	OpeningBaseUnits uint64    `json:"openingBaseUnits,omitempty"`
+	OpeningAt        time.Time `json:"openingAt,omitzero"`
+	Status           string    `json:"status"`
+	Reason           string    `json:"reason,omitempty"`
 }
 
 type metaLine struct {

@@ -36,6 +36,7 @@ const (
 	microPerCredit        = 1_000_000
 	creditBase            = 10
 	statusConfirmed       = "confirmed" // terminal burn status in burns.jsonl
+	chainWaves            = "waves"
 )
 
 // Node is the read surface the preview endpoint needs.
@@ -113,7 +114,7 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusUnprocessableEntity, "unsupported_history", err.Error())
 		return
 	}
-	units, err := chains.BaseUnits("waves")
+	units, err := chains.BaseUnits(chainWaves)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "config_error", err.Error())
 		return
@@ -138,7 +139,7 @@ func (s *Server) address(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_address", err.Error())
 		return
 	}
-	_, bundles, err := snapshot.Build(s.cfg.DataDir, s.journal, s.cfg.HearthSchemeByte())
+	_, bundles, err := snapshot.Build(s.cfg.DataDir, map[string]*journal.Journal{chainWaves: s.journal}, s.cfg.HearthSchemeByte())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "artifacts_error", err.Error())
 		return
@@ -181,7 +182,7 @@ func (s *Server) postBinding(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "malformed", err.Error())
 		return
 	}
-	rec.Chain = "waves"
+	rec.Chain = chainWaves
 	if err := s.registry.Add(rec); err != nil {
 		writeBindingError(w, err)
 		return

@@ -29,9 +29,10 @@ func run() int {
 		slog.Error("journal", "err", err)
 		return 1
 	}
+	journals := map[string]*journal.Journal{"waves": j}
 
 	if *verify {
-		if vErr := snapshot.Verify(cfg.DataDir, j, cfg.HearthSchemeByte()); vErr != nil {
+		if vErr := snapshot.Verify(cfg.DataDir, journals, cfg.HearthSchemeByte()); vErr != nil {
 			slog.Error("verify", "err", vErr)
 			return 1
 		}
@@ -39,7 +40,7 @@ func run() int {
 		return 0
 	}
 
-	snap, bundles, err := snapshot.Build(cfg.DataDir, j, cfg.HearthSchemeByte())
+	snap, bundles, err := snapshot.Build(cfg.DataDir, journals, cfg.HearthSchemeByte())
 	if err != nil {
 		slog.Error("build", "err", err)
 		return 1

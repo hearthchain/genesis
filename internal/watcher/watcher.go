@@ -119,14 +119,16 @@ func (w *Watcher) ensureHistory(ctx context.Context, source string, tip uint64) 
 		return err
 	}
 	meta := store.TransferMeta{
-		Address:         source,
-		Chain:           w.Adapter.Name(),
-		FetchedAt:       time.Now().UTC(),
-		ReferenceHeight: h.ReferenceHeight,
-		NodeBalance:     h.NodeBalance,
-		Recomputed:      h.Recomputed,
-		Status:          h.Status,
-		Reason:          h.Reason,
+		Address:          source,
+		Chain:            w.Adapter.Name(),
+		FetchedAt:        time.Now().UTC(),
+		ReferenceHeight:  h.ReferenceHeight,
+		NodeBalance:      h.NodeBalance,
+		Recomputed:       h.Recomputed,
+		OpeningBaseUnits: h.OpeningBaseUnits,
+		OpeningAt:        h.OpeningAt,
+		Status:           h.Status,
+		Reason:           h.Reason,
 	}
 	slog.Info("history recorded", "source", source, "status", meta.Status, "reason", meta.Reason)
 	return store.WriteTransfers(path, meta, h.Txs)

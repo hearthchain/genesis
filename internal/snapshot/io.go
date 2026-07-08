@@ -44,7 +44,7 @@ func Write(dataDir string, snap Snapshot, bundles []evidence.Bundle) error {
 
 // Verify rebuilds the snapshot from the artifacts and compares Merkle roots
 // with the stored snapshot.json: the anyone-can-recompute check.
-func Verify(dataDir string, j *journal.Journal, hearthScheme byte) error {
+func Verify(dataDir string, journals map[string]*journal.Journal, hearthScheme byte) error {
 	raw, err := os.ReadFile(filepath.Join(dataDir, "snapshot.json")) //nolint:gosec // dataDir is an operator flag
 	if err != nil {
 		return fmt.Errorf("snapshot: %w", err)
@@ -53,7 +53,7 @@ func Verify(dataDir string, j *journal.Journal, hearthScheme byte) error {
 	if uErr := json.Unmarshal(raw, &stored); uErr != nil {
 		return fmt.Errorf("snapshot: stored snapshot.json: %w", uErr)
 	}
-	rebuilt, _, err := Build(dataDir, j, hearthScheme)
+	rebuilt, _, err := Build(dataDir, journals, hearthScheme)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/hearthchain/burning-page/internal/journal"
 	"github.com/hearthchain/burning-page/internal/snapshot"
 	"github.com/hearthchain/burning-page/internal/store"
 )
@@ -21,7 +22,7 @@ type chainStats struct {
 // stats serves the front-page counters. Everything is recomputed from the
 // artifacts per request, like the address endpoint: the server stays a cache.
 func (s *Server) stats(w http.ResponseWriter, _ *http.Request) {
-	snap, _, err := snapshot.Build(s.cfg.DataDir, s.journal, s.cfg.HearthSchemeByte())
+	snap, _, err := snapshot.Build(s.cfg.DataDir, map[string]*journal.Journal{chainWaves: s.journal}, s.cfg.HearthSchemeByte())
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "artifacts_error", err.Error())
 		return

@@ -67,6 +67,20 @@ const (
 	StatusUnsupported = "unsupported"
 )
 
+// WithOpening prepends the synthetic opening delta of a truncated history:
+// the pre-index remainder enters as one deposit dated at the truncation
+// boundary, opening the oldest layer. Height 0 keeps it first under any
+// height-ordered replay, and the "opening" TxID never appears in burn maps.
+// A zero opening returns the deltas unchanged (complete-history chains).
+func WithOpening(deltas []Delta, opening uint64, at time.Time) []Delta {
+	if opening == 0 {
+		return deltas
+	}
+	// #nosec G115 -- chain supplies fit int64 by orders of magnitude
+	head := Delta{TxID: "opening", Timestamp: at, Amount: int64(opening)}
+	return append([]Delta{head}, deltas...)
+}
+
 // Status is the verdict of a delta reconstruction: Kind "ok" or "unsupported"
 // (the history contains a transaction the adapter does not interpret; the
 // address is blocked to manual review rather than risking a wrong credit).
