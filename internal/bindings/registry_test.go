@@ -137,3 +137,81 @@ func TestAddDispatchesByFormat(t *testing.T) {
 	unknown.Format = "keeper-v2"
 	assert.ErrorContains(t, reg.Add(unknown), "format")
 }
+
+func memoRecord(t *testing.T, hearthSeed, txID string) bindings.Record {
+	t.Helper()
+	_, hearthPub, err := crypto.GenerateKeyPair([]byte(hearthSeed))
+	require.NoError(t, err)
+	hearth, err := hearthaddr.New('H', hearthPub)
+	require.NoError(t, err)
+	return bindings.Record{
+		Source: "alicewyl1235",
+		Chain:  "eos",
+		Hearth: hearth,
+		Format: "eos-memo-v1",
+		TxID:   txID,
+	}
+}
+
+func TestAddVerifiedRecordsMemoBindings(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "bindings.jsonl")
+	reg, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+
+	first := memoRecord(t, "eos hearth one", "trx-one")
+	require.NoError(t, reg.AddVerified(first))
+	second := memoRecord(t, "eos hearth two", "trx-two")
+	require.NoError(t, reg.AddVerified(second))
+
+	hearth, ok := reg.HearthFor("alicewyl1235")
+	require.True(t, ok)
+	assert.Equal(t, second.Hearth, hearth, "the latest memo wins")
+
+	current, ok := reg.Current("alicewyl1235")
+	require.True(t, ok)
+	assert.Equal(t, "trx-two", current.TxID, "the on-chain proof pointer is kept")
+
+	// Persisted: a fresh registry sees the same state.
+	reg2, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+	current2, ok := reg2.Current("alicewyl1235")
+	require.True(t, ok)
+	assert.Equal(t, "trx-two", current2.TxID)
+}
+
+func TestAddVerifiedValidatesTheHearthAddress(t *testing.T) {
+	reg, err := bindings.Load(filepath.Join(t.TempDir(), "bindings.jsonl"), 'H')
+	require.NoError(t, err)
+
+	rec := memoRecord(t, "eos hearth one", "trx-one")
+	rec.Hearth = "3Hnothearth"
+	assert.Error(t, reg.AddVerified(rec))
+}
+
+func TestAddRejectsMemoFormatFromTheAPI(t *testing.T) {
+	// SECURITY: POST /api/bindings must never accept eos-memo-v1: it carries
+	// no signature, its proof is the on-chain transfer only the watcher saw.
+	reg, err := bindings.Load(filepath.Join(t.TempDir(), "bindings.jsonl"), 'H')
+	require.NoError(t, err)
+
+	err = reg.Add(memoRecord(t, "eos hearth one", "trx-one"))
+	require.Error(t, err)
+	assert.NotContains(t, err.Error(), "unknown", "the format is known, just not submittable")
+}
+
+func TestSeenTxTracksEveryRecordedBindingTx(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "bindings.jsonl")
+	reg, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+
+	require.NoError(t, reg.AddVerified(memoRecord(t, "eos hearth one", "trx-one")))
+	require.NoError(t, reg.AddVerified(memoRecord(t, "eos hearth two", "trx-two")))
+
+	assert.True(t, reg.SeenTx("trx-one"), "superseded bindings stay deduplicated")
+	assert.True(t, reg.SeenTx("trx-two"))
+	assert.False(t, reg.SeenTx("trx-three"))
+
+	reg2, err := bindings.Load(path, 'H')
+	require.NoError(t, err)
+	assert.True(t, reg2.SeenTx("trx-one"), "the seen set survives a reload")
+}

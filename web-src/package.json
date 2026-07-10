@@ -1,0 +1,10 @@
+{
+  "name": "burning-page-web",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p ."
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

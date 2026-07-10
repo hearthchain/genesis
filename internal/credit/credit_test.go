@@ -20,6 +20,8 @@ func loadJournal(t *testing.T) *journal.Journal {
 	return j
 }
 
+const wavesUnits = 100_000_000 // wavelets per WAVES
+
 func TestComputePinsTheSpecExample(t *testing.T) {
 	// 1000 WAVES held since March 2022: max weekly average $49.713174 for the
 	// week of 2022-04-03 -> 49713.174 HRTH.
@@ -28,7 +30,7 @@ func TestComputePinsTheSpecExample(t *testing.T) {
 		{Amount: 100_000_000_000, Since: time.Date(2022, 3, 14, 0, 0, 0, 0, time.UTC)},
 	}
 
-	total, perLayer, err := credit.Compute(consumed, j)
+	total, perLayer, err := credit.Compute(consumed, j, wavesUnits)
 	require.NoError(t, err)
 
 	assert.Equal(t, big.NewInt(49_713_174_000), total, "micro-HRTH")
@@ -47,7 +49,7 @@ func TestComputeSumsLayersWithTheirOwnDates(t *testing.T) {
 		{Amount: 100_000_000_000, Since: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
 
-	total, perLayer, err := credit.Compute(consumed, j)
+	total, perLayer, err := credit.Compute(consumed, j, wavesUnits)
 	require.NoError(t, err)
 
 	require.Len(t, perLayer, 2)
@@ -62,9 +64,25 @@ func TestComputeTruncatesSubMicroRemainders(t *testing.T) {
 	consumed := []layers.Layer{
 		{Amount: 1, Since: time.Date(2022, 3, 14, 0, 0, 0, 0, time.UTC)},
 	}
-	total, _, err := credit.Compute(consumed, j)
+	total, _, err := credit.Compute(consumed, j, wavesUnits)
 	require.NoError(t, err)
 	assert.Equal(t, big.NewInt(0), total)
+}
+
+func TestComputeScalesByChainBaseUnits(t *testing.T) {
+	// A 4-decimal chain: 1.0000 coin = 10_000 base units, so the credit is
+	// price * 10000 / 10000 = the full layer price in micro-HRTH.
+	j := loadJournal(t)
+	consumed := []layers.Layer{
+		{Amount: 10_000, Since: time.Date(2022, 3, 14, 0, 0, 0, 0, time.UTC)},
+	}
+
+	total, perLayer, err := credit.Compute(consumed, j, 10_000)
+	require.NoError(t, err)
+
+	assert.Equal(t, big.NewInt(49_713_174), total)
+	require.Len(t, perLayer, 1)
+	assert.Equal(t, "49713174", perLayer[0].CreditMicro)
 }
 
 func TestComputeFailsWhenJournalHasNoWeeks(t *testing.T) {
@@ -72,6 +90,6 @@ func TestComputeFailsWhenJournalHasNoWeeks(t *testing.T) {
 	consumed := []layers.Layer{
 		{Amount: 100, Since: time.Date(2999, 1, 1, 0, 0, 0, 0, time.UTC)},
 	}
-	_, _, err := credit.Compute(consumed, j)
+	_, _, err := credit.Compute(consumed, j, wavesUnits)
 	assert.Error(t, err)
 }

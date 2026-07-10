@@ -23,3 +23,6 @@ test.go
 .idea/
 .vscode/
 .DS_Store
+
+# frontend toolchain
+web-src/node_modules/

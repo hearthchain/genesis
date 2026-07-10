@@ -1,0 +1,774 @@
+{
+  "block_num": 507709376,
+  "block_time": "2026-07-04T11:17:05.500",
+  "head_block_num": 508445649,
+  "id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631",
+  "irreversible": true,
+  "last_irreversible_block": 508445647,
+  "traces": [
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "woaizuqiu123",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "woaizuqiu123",
+          "memo": "joinroom:5",
+          "quantity": "10.0000 A",
+          "to": "alicewyl1235"
+        },
+        "hex_data": "3044d0ceeaef0ce5508608d173855c34a08601000000000004410000000000000a6a6f696e726f6f6d3a35",
+        "name": "transfer"
+      },
+      "action_ordinal": 1,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 0,
+      "context_free": false,
+      "creator_action_ordinal": 0,
+      "elapsed": 83,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "87185fcc34a407ada4cc92dc94b6d5ad6d2e68b2af7cadc214f4b54091a3821a",
+        "auth_sequence": [
+          [
+            "woaizuqiu123",
+            141
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066993,
+        "receiver": "core.vaulta",
+        "recv_sequence": 142349980
+      },
+      "receiver": "core.vaulta",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "woaizuqiu123",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "woaizuqiu123",
+          "memo": "joinroom:5",
+          "quantity": "10.0000 A",
+          "to": "alicewyl1235"
+        },
+        "hex_data": "3044d0ceeaef0ce5508608d173855c34a08601000000000004410000000000000a6a6f696e726f6f6d3a35",
+        "name": "transfer"
+      },
+      "action_ordinal": 2,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 1,
+      "elapsed": 3,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "87185fcc34a407ada4cc92dc94b6d5ad6d2e68b2af7cadc214f4b54091a3821a",
+        "auth_sequence": [
+          [
+            "woaizuqiu123",
+            142
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066994,
+        "receiver": "woaizuqiu123",
+        "recv_sequence": 67
+      },
+      "receiver": "woaizuqiu123",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [
+        {
+          "account": "alicewyl1235",
+          "delta": 416
+        }
+      ],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "woaizuqiu123",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "woaizuqiu123",
+          "memo": "joinroom:5",
+          "quantity": "10.0000 A",
+          "to": "alicewyl1235"
+        },
+        "hex_data": "3044d0ceeaef0ce5508608d173855c34a08601000000000004410000000000000a6a6f696e726f6f6d3a35",
+        "name": "transfer"
+      },
+      "action_ordinal": 3,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 1,
+      "elapsed": 172,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "87185fcc34a407ada4cc92dc94b6d5ad6d2e68b2af7cadc214f4b54091a3821a",
+        "auth_sequence": [
+          [
+            "woaizuqiu123",
+            143
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066995,
+        "receiver": "alicewyl1235",
+        "recv_sequence": 44877
+      },
+      "receiver": "alicewyl1235",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "minepool burn",
+          "quantity": "0.0100 A",
+          "to": "eosio.null"
+        },
+        "hex_data": "508608d173855c3400408c7a02ea3055640000000000000004410000000000000d6d696e65706f6f6c206275726e",
+        "name": "transfer"
+      },
+      "action_ordinal": 4,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 3,
+      "elapsed": 26,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "45338a9bacd1fb0a3e680260ffadbf6a3e22d2538f9f65a2b8490269b494fe86",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62477
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066996,
+        "receiver": "core.vaulta",
+        "recv_sequence": 142349981
+      },
+      "receiver": "core.vaulta",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "minepool burn",
+          "quantity": "0.0100 A",
+          "to": "eosio.null"
+        },
+        "hex_data": "508608d173855c3400408c7a02ea3055640000000000000004410000000000000d6d696e65706f6f6c206275726e",
+        "name": "transfer"
+      },
+      "action_ordinal": 9,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 4,
+      "context_free": false,
+      "creator_action_ordinal": 4,
+      "elapsed": 6,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "45338a9bacd1fb0a3e680260ffadbf6a3e22d2538f9f65a2b8490269b494fe86",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62478
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066997,
+        "receiver": "alicewyl1235",
+        "recv_sequence": 44878
+      },
+      "receiver": "alicewyl1235",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "minepool burn",
+          "quantity": "0.0100 A",
+          "to": "eosio.null"
+        },
+        "hex_data": "508608d173855c3400408c7a02ea3055640000000000000004410000000000000d6d696e65706f6f6c206275726e",
+        "name": "transfer"
+      },
+      "action_ordinal": 10,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 4,
+      "context_free": false,
+      "creator_action_ordinal": 4,
+      "elapsed": 3,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "45338a9bacd1fb0a3e680260ffadbf6a3e22d2538f9f65a2b8490269b494fe86",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62479
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066998,
+        "receiver": "eosio.null",
+        "recv_sequence": 112884181
+      },
+      "receiver": "eosio.null",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "buyback",
+          "quantity": "0.0100 A",
+          "to": "rbredbagtokn"
+        },
+        "hex_data": "508608d173855c343021cdcc9ca4eeb964000000000000000441000000000000076275796261636b",
+        "name": "transfer"
+      },
+      "action_ordinal": 5,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 3,
+      "elapsed": 14,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "3a350c32c2f6e39ece9752f2241577d2d200955ae74fd3900559c5b904f0a995",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62480
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874066999,
+        "receiver": "core.vaulta",
+        "recv_sequence": 142349982
+      },
+      "receiver": "core.vaulta",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "buyback",
+          "quantity": "0.0100 A",
+          "to": "rbredbagtokn"
+        },
+        "hex_data": "508608d173855c343021cdcc9ca4eeb964000000000000000441000000000000076275796261636b",
+        "name": "transfer"
+      },
+      "action_ordinal": 11,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 5,
+      "context_free": false,
+      "creator_action_ordinal": 5,
+      "elapsed": 5,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "3a350c32c2f6e39ece9752f2241577d2d200955ae74fd3900559c5b904f0a995",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62481
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874067000,
+        "receiver": "alicewyl1235",
+        "recv_sequence": 44879
+      },
+      "receiver": "alicewyl1235",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "buyback",
+          "quantity": "0.0100 A",
+          "to": "rbredbagtokn"
+        },
+        "hex_data": "508608d173855c343021cdcc9ca4eeb964000000000000000441000000000000076275796261636b",
+        "name": "transfer"
+      },
+      "action_ordinal": 12,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 5,
+      "context_free": false,
+      "creator_action_ordinal": 5,
+      "elapsed": 11,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "3a350c32c2f6e39ece9752f2241577d2d200955ae74fd3900559c5b904f0a995",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62482
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874067001,
+        "receiver": "rbredbagtokn",
+        "recv_sequence": 1168
+      },
+      "receiver": "rbredbagtokn",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "platform fee",
+          "quantity": "0.0300 A",
+          "to": "eostomoongog"
+        },
+        "hex_data": "508608d173855c34c0289b944a9a31552c0100000000000004410000000000000c706c6174666f726d20666565",
+        "name": "transfer"
+      },
+      "action_ordinal": 6,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 3,
+      "elapsed": 18,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "71a7f8db06254e38763bbe939e76c9ea7457af50fcd304182a235cfa8238a4e5",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62483
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874067002,
+        "receiver": "core.vaulta",
+        "recv_sequence": 142349983
+      },
+      "receiver": "core.vaulta",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "platform fee",
+          "quantity": "0.0300 A",
+          "to": "eostomoongog"
+        },
+        "hex_data": "508608d173855c34c0289b944a9a31552c0100000000000004410000000000000c706c6174666f726d20666565",
+        "name": "transfer"
+      },
+      "action_ordinal": 13,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 6,
+      "context_free": false,
+      "creator_action_ordinal": 6,
+      "elapsed": 6,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "71a7f8db06254e38763bbe939e76c9ea7457af50fcd304182a235cfa8238a4e5",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62484
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874067003,
+        "receiver": "alicewyl1235",
+        "recv_sequence": 44880
+      },
+      "receiver": "alicewyl1235",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "core.vaulta",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "platform fee",
+          "quantity": "0.0300 A",
+          "to": "eostomoongog"
+        },
+        "hex_data": "508608d173855c34c0289b944a9a31552c0100000000000004410000000000000c706c6174666f726d20666565",
+        "name": "transfer"
+      },
+      "action_ordinal": 14,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 6,
+      "context_free": false,
+      "creator_action_ordinal": 6,
+      "elapsed": 6,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 2,
+        "act_digest": "71a7f8db06254e38763bbe939e76c9ea7457af50fcd304182a235cfa8238a4e5",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62485
+          ]
+        ],
+        "code_sequence": 2,
+        "global_sequence": 367874067004,
+        "receiver": "eostomoongog",
+        "recv_sequence": 22702
+      },
+      "receiver": "eostomoongog",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "rbredbagtokn",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "memo": "mine",
+          "quantity": "10.0000 RBC",
+          "to": "alicewyl1235"
+        },
+        "hex_data": "508608d173855c34a0860100000000000452424300000000046d696e65",
+        "name": "issue"
+      },
+      "action_ordinal": 7,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 3,
+      "elapsed": 19,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 1,
+        "act_digest": "a34bc760806db779a68777e1564db3586d3474cd2daff99c1ebc5afa5d0179cb",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62486
+          ]
+        ],
+        "code_sequence": 1,
+        "global_sequence": 367874067005,
+        "receiver": "rbredbagtokn",
+        "recv_sequence": 1169
+      },
+      "receiver": "rbredbagtokn",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [
+        {
+          "account": "alicewyl1235",
+          "delta": 240
+        }
+      ],
+      "act": {
+        "account": "rbredbagtokn",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "mine",
+          "quantity": "10.0000 RBC",
+          "to": "woaizuqiu123"
+        },
+        "hex_data": "508608d173855c343044d0ceeaef0ce5a0860100000000000452424300000000046d696e65",
+        "name": "transfer"
+      },
+      "action_ordinal": 8,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 1,
+      "context_free": false,
+      "creator_action_ordinal": 3,
+      "elapsed": 24,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 1,
+        "act_digest": "a50fe855ddcf3d16b8925b085d195111739a360518a03e8e945eb4c58bc1156f",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62487
+          ]
+        ],
+        "code_sequence": 1,
+        "global_sequence": 367874067006,
+        "receiver": "rbredbagtokn",
+        "recv_sequence": 1170
+      },
+      "receiver": "rbredbagtokn",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "rbredbagtokn",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "mine",
+          "quantity": "10.0000 RBC",
+          "to": "woaizuqiu123"
+        },
+        "hex_data": "508608d173855c343044d0ceeaef0ce5a0860100000000000452424300000000046d696e65",
+        "name": "transfer"
+      },
+      "action_ordinal": 15,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 8,
+      "context_free": false,
+      "creator_action_ordinal": 8,
+      "elapsed": 6,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 1,
+        "act_digest": "a50fe855ddcf3d16b8925b085d195111739a360518a03e8e945eb4c58bc1156f",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62488
+          ]
+        ],
+        "code_sequence": 1,
+        "global_sequence": 367874067007,
+        "receiver": "alicewyl1235",
+        "recv_sequence": 44881
+      },
+      "receiver": "alicewyl1235",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    },
+    {
+      "account_ram_deltas": [],
+      "act": {
+        "account": "rbredbagtokn",
+        "authorization": [
+          {
+            "actor": "alicewyl1235",
+            "permission": "active"
+          }
+        ],
+        "data": {
+          "from": "alicewyl1235",
+          "memo": "mine",
+          "quantity": "10.0000 RBC",
+          "to": "woaizuqiu123"
+        },
+        "hex_data": "508608d173855c343044d0ceeaef0ce5a0860100000000000452424300000000046d696e65",
+        "name": "transfer"
+      },
+      "action_ordinal": 16,
+      "block_num": 507709376,
+      "block_time": "2026-07-04T11:17:05.500",
+      "closest_unnotified_ancestor_action_ordinal": 8,
+      "context_free": false,
+      "creator_action_ordinal": 8,
+      "elapsed": 2,
+      "producer_block_id": "1e4307c0a5d0b5a4a50c76102015b2d488a781419e371c6502308424507e8dc9",
+      "receipt": {
+        "abi_sequence": 1,
+        "act_digest": "a50fe855ddcf3d16b8925b085d195111739a360518a03e8e945eb4c58bc1156f",
+        "auth_sequence": [
+          [
+            "alicewyl1235",
+            62489
+          ]
+        ],
+        "code_sequence": 1,
+        "global_sequence": 367874067008,
+        "receiver": "woaizuqiu123",
+        "recv_sequence": 68
+      },
+      "receiver": "woaizuqiu123",
+      "trx_id": "3e2581376b6e2a3705d7225a7a6889e5afe0fc5578cc2d27b8eeb8554abd6631"
+    }
+  ],
+  "transaction_num": 0,
+  "trx": {
+    "receipt": {
+      "cpu_usage_us": 475,
+      "net_usage_words": 17,
+      "status": "executed",
+      "trx": [
+        1,
+        {
+          "compression": "none",
+          "packed_context_free_data": "",
+          "packed_trx": "e7eb486ab207b5b0bb850000000001004c8eda6ca02e45000000572d3ccdcd013044d0ceeaef0ce500000000a8ed32322b3044d0ceeaef0ce5508608d173855c34a08601000000000004410000000000000a6a6f696e726f6f6d3a3500",
+          "signatures": [
+            "SIG_K1_K3s7Z6sDG5Lxqv1d86kj2LX4hJTCjqPcvyc5un2K3CuPVogxXQR5Kod8PMbtW7LHj7rxHisgd6tCwAUn8z6rJddhnnript"
+          ]
+        }
+      ]
+    },
+    "trx": {
+      "actions": [
+        {
+          "account": "core.vaulta",
+          "authorization": [
+            {
+              "actor": "woaizuqiu123",
+              "permission": "active"
+            }
+          ],
+          "data": {
+            "from": "woaizuqiu123",
+            "memo": "joinroom:5",
+            "quantity": "10.0000 A",
+            "to": "alicewyl1235"
+          },
+          "hex_data": "3044d0ceeaef0ce5508608d173855c34a08601000000000004410000000000000a6a6f696e726f6f6d3a35",
+          "name": "transfer"
+        }
+      ],
+      "context_free_actions": [],
+      "context_free_data": [],
+      "delay_sec": 0,
+      "expiration": "2026-07-04T11:17:59",
+      "max_cpu_usage_ms": 0,
+      "max_net_usage_words": 0,
+      "ref_block_num": 1970,
+      "ref_block_prefix": 2243670197,
+      "signatures": [
+        "SIG_K1_K3s7Z6sDG5Lxqv1d86kj2LX4hJTCjqPcvyc5un2K3CuPVogxXQR5Kod8PMbtW7LHj7rxHisgd6tCwAUn8z6rJddhnnript"
+      ]
+    }
+  }
+}

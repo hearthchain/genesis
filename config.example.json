@@ -1,17 +1,35 @@
 {
-  "nodes": {
-    "primary": "https://nodes.wavesnodes.com",
-    "secondary": "https://nodes.wx.network"
+  "chains": {
+    "waves": {
+      "nodes": {
+        "primary": "https://nodes.wavesnodes.com",
+        "secondary": "https://nodes.wx.network"
+      },
+      "burnAddress": "3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1",
+      "window": {
+        "startHeight": 0,
+        "endHeight": 0
+      },
+      "confirmations": 100,
+      "journalCSV": "data/journal/waves.csv"
+    },
+    "eos": {
+      "nodes": {
+        "primary": "https://eos.api.eosnation.io",
+        "secondary": "https://eos.greymass.com"
+      },
+      "historyAPI": "https://eos.hyperion.eosrio.io",
+      "burnAddress": "eosio.null",
+      "window": {
+        "startHeight": 0,
+        "endHeight": 0
+      },
+      "confirmations": 0,
+      "journalCSV": "data/journal/eos.csv"
+    }
   },
-  "burnAddress": "3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1",
-  "window": {
-    "startHeight": 0,
-    "endHeight": 0
-  },
-  "confirmations": 100,
   "dataDir": "data",
-  "journalCSV": "data/journal/waves.csv",
   "listenAddr": ":8080",
   "hearthScheme": "H",
-  "allowedOrigins": ["https://genesis.hearth.tech"]
+  "allowedOrigins": ["https://hearth.tech"]
 }

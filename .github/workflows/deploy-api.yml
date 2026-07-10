@@ -51,7 +51,7 @@ jobs:
           ssh $opts "$SSH_USER@$HOST" 'set -eu
             mkdir -p /opt/hearth/bin
             mv -f /opt/hearth/bin.new/* /opt/hearth/bin/
-            sudo systemctl restart hearth-api hearth-watcher
+            sudo systemctl restart hearth-api hearth-watcher hearth-watcher-eos
             sleep 2
-            systemctl is-active hearth-api hearth-watcher
+            systemctl is-active hearth-api hearth-watcher hearth-watcher-eos
             curl -fsS http://localhost:8080/api/stats > /dev/null'

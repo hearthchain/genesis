@@ -20,6 +20,7 @@ import (
 	"github.com/hearthchain/burning-page/internal/binding"
 	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/hearthaddr"
 	"github.com/hearthchain/burning-page/internal/journal"
@@ -28,6 +29,8 @@ import (
 
 type fakeNode struct {
 	histories map[string][]json.RawMessage
+	tip       uint64
+	balances  map[string]uint64
 }
 
 func (f *fakeNode) AllTransactions(_ context.Context, addr string) ([]json.RawMessage, error) {
@@ -36,6 +39,12 @@ func (f *fakeNode) AllTransactions(_ context.Context, addr string) ([]json.RawMe
 		return nil, fmt.Errorf("fake: no such address %s", addr)
 	}
 	return txs, nil
+}
+
+func (f *fakeNode) Height(context.Context) (uint64, error) { return f.tip, nil }
+
+func (f *fakeNode) BalanceAfterConfirmations(_ context.Context, addr string, _ uint64) (uint64, error) {
+	return f.balances[addr], nil
 }
 
 type identity struct {
@@ -74,11 +83,11 @@ func newServer(t *testing.T, id identity) *httptest.Server {
 	// One confirmed burn from id.source with a verified transfer history.
 	burnTx := `{"type":4,"id":"B1","sender":"` + id.source + `","recipient":"3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1","assetId":null,"amount":100000000000,"fee":100000,"feeAssetId":null,"timestamp":1754049600000,"height":4000010}`
 	require.NoError(t, store.AppendJSONL(filepath.Join(dataDir, "burns.jsonl"), map[string]any{
-		"txId": "B1", "chain": "waves", "source": id.source, "amountWavelets": 100000000000,
+		"txId": "B1", "chain": "waves", "source": id.source, "amountBaseUnits": 100000000000,
 		"height": 4000010, "timestamp": "2026-08-01T12:00:00Z", "status": "confirmed",
 	}))
 	meta := store.TransferMeta{Address: id.source, ReferenceHeight: 4000100, Status: "ok"}
-	require.NoError(t, store.WriteTransfers(filepath.Join(dataDir, "transfers", id.source+".jsonl"), meta,
+	require.NoError(t, store.WriteTransfers(filepath.Join(dataDir, "transfers", "waves", id.source+".jsonl"), meta,
 		[]json.RawMessage{depositTx(id.source, 200000000000, "3000000@1647216000000"), json.RawMessage(burnTx)}))
 
 	j, err := journal.Load("../../data/journal/waves.csv")
@@ -89,13 +98,21 @@ func newServer(t *testing.T, id identity) *httptest.Server {
 	var cfg config.Config
 	cfg.DataDir = dataDir
 	cfg.HearthScheme = "H"
-	cfg.Window = chain.Window{Start: 4000000, End: 4001000}
-	cfg.AllowedOrigins = []string{"https://genesis.hearth.tech"}
+	var cc config.ChainConfig
+	cc.Window = chain.Window{Start: 4000000, End: 4001000}
+	cfg.Chains = map[string]config.ChainConfig{"waves": cc}
+	cfg.AllowedOrigins = []string{"https://hearth.tech"}
 
-	node := &fakeNode{histories: map[string][]json.RawMessage{
-		id.source: {depositTx(id.source, 100000000000, "3000000@1647216000000")},
-	}}
-	srv := httptest.NewServer(api.New(node, j, reg, cfg).Handler())
+	node := &fakeNode{
+		histories: map[string][]json.RawMessage{
+			id.source: {depositTx(id.source, 100000000000, "3000000@1647216000000")},
+		},
+		tip:      4000200,
+		balances: map[string]uint64{id.source: 100000000000},
+	}
+	adapters := map[string]chain.Adapter{"waves": &waves.Adapter{Primary: node}}
+	journals := map[string]*journal.Journal{"waves": j}
+	srv := httptest.NewServer(api.New(adapters, journals, reg, cfg).Handler())
 	t.Cleanup(srv.Close)
 	return srv
 }
@@ -170,6 +187,11 @@ func TestPreviewComputesLayersLive(t *testing.T) {
 	require.NoError(t, err)
 	t.Cleanup(func() { _ = respBad.Body.Close() })
 	assert.Equal(t, http.StatusBadRequest, respBad.StatusCode)
+
+	respUnknown, err := http.Get(srv.URL + "/api/preview/dogecoin/" + id.source)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = respUnknown.Body.Close() })
+	assert.Equal(t, http.StatusNotFound, respUnknown.StatusCode, "unknown chain lanes are 404")
 }
 
 func getJSON(t *testing.T, url string) map[string]any {
@@ -232,7 +254,7 @@ func TestAddressShowsPendingBurnsWithoutCredit(t *testing.T) {
 
 	// A fresh burn recorded by the watcher before maturity.
 	require.NoError(t, store.AppendJSONL(filepath.Join(serverDataDir, "burns.jsonl"), map[string]any{
-		"txId": "Fresh1", "chain": "waves", "source": id.source, "amountWavelets": 10000000,
+		"txId": "Fresh1", "chain": "waves", "source": id.source, "amountBaseUnits": 10000000,
 		"height": 4000900, "timestamp": "2026-08-01T13:00:00Z", "status": "pending_confirmations",
 	}))
 

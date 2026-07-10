@@ -16,7 +16,7 @@ import (
 
 // Layer is a quantity of coins continuously present on the address since a date.
 type Layer struct {
-	Amount uint64    `json:"amountWavelets"`
+	Amount uint64    `json:"amountBaseUnits"`
 	Since  time.Time `json:"since"`
 }
 

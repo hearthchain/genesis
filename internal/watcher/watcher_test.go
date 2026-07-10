@@ -10,9 +10,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/wavesplatform/gowaves/pkg/crypto"
 
+	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
+	"github.com/hearthchain/burning-page/internal/hearthaddr"
 	"github.com/hearthchain/burning-page/internal/store"
 	"github.com/hearthchain/burning-page/internal/watcher"
 )
@@ -85,27 +89,26 @@ func testNode(t *testing.T) *fakeNode {
 	}
 }
 
-func testConfig(t *testing.T) config.Config {
-	t.Helper()
-	var cfg config.Config
-	cfg.Nodes.Primary = "fake"
-	cfg.Nodes.Secondary = "fake"
-	cfg.BurnAddress = burnAddr
-	cfg.Window = chain.Window{Start: 4000000, End: 4001000}
-	cfg.Confirmations = 100
-	cfg.DataDir = t.TempDir()
-	cfg.HearthScheme = "H"
-	return cfg
+func testAdapter(node *fakeNode) *waves.Adapter {
+	return &waves.Adapter{Primary: node, Secondary: node, BurnAddress: burnAddr}
+}
+
+func testChainConfig() config.ChainConfig {
+	var cc config.ChainConfig
+	cc.BurnAddress = burnAddr
+	cc.Window = chain.Window{Start: 4000000, End: 4001000}
+	cc.Confirmations = 100
+	return cc
 }
 
 func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
-	w := &watcher.Watcher{Primary: node, Secondary: node, Cfg: cfg}
+	dataDir := t.TempDir()
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 
 	require.NoError(t, w.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	require.Len(t, records, 3)
 	byID := map[string]watcher.BurnRecord{}
@@ -118,13 +121,14 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 	assert.Equal(t, "pending_confirmations", byID["FreshBurn9999"].Status,
 		"a fresh burn is visible immediately, credit waits for maturity")
 
-	aliceMeta, _, err := store.ReadTransfers(filepath.Join(cfg.DataDir, "transfers", alice+".jsonl"))
+	aliceMeta, _, err := store.ReadTransfers(filepath.Join(dataDir, "transfers", "waves", alice+".jsonl"))
 	require.NoError(t, err)
 	assert.Equal(t, "ok", aliceMeta.Status)
+	assert.Equal(t, "waves", aliceMeta.Chain)
 	assert.Equal(t, int64(99900000), aliceMeta.Recomputed)
 	assert.Equal(t, uint64(99900000), aliceMeta.NodeBalance)
 
-	carolMeta, _, err := store.ReadTransfers(filepath.Join(cfg.DataDir, "transfers", carol+".jsonl"))
+	carolMeta, _, err := store.ReadTransfers(filepath.Join(dataDir, "transfers", "waves", carol+".jsonl"))
 	require.NoError(t, err)
 	assert.Equal(t, "unsupported", carolMeta.Status)
 	assert.Contains(t, carolMeta.Reason, "type 8")
@@ -132,38 +136,125 @@ func TestPollDetectsCrossChecksAndWritesArtifacts(t *testing.T) {
 
 func TestPollIsIdempotentAcrossRestarts(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
+	dataDir := t.TempDir()
 
-	w := &watcher.Watcher{Primary: node, Secondary: node, Cfg: cfg}
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w.Poll(t.Context()))
 
 	// A fresh watcher over the same data dir must not duplicate anything.
-	w2 := &watcher.Watcher{Primary: node, Secondary: node, Cfg: cfg}
+	w2 := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w2.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	assert.Len(t, records, 3, "rescan must skip already-recorded states")
 
-	entries, err := os.ReadDir(filepath.Join(cfg.DataDir, "transfers"))
+	entries, err := os.ReadDir(filepath.Join(dataDir, "transfers", "waves"))
 	require.NoError(t, err)
 	assert.Len(t, entries, 2)
 }
 
 func TestPendingBurnUpgradesWhenMature(t *testing.T) {
 	node := testNode(t)
-	cfg := testConfig(t)
-	w := &watcher.Watcher{Primary: node, Secondary: node, Cfg: cfg}
+	dataDir := t.TempDir()
+	w := &watcher.Watcher{Adapter: testAdapter(node), ChainCfg: testChainConfig(), DataDir: dataDir}
 	require.NoError(t, w.Poll(t.Context()))
 
 	node.tip = 4000300 // FreshBurn9999 at 4000150 now has >100 confirmations
 	require.NoError(t, w.Poll(t.Context()))
 
-	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(cfg.DataDir, "burns.jsonl"))
+	records, err := store.ReadJSONL[watcher.BurnRecord](filepath.Join(dataDir, "burns.jsonl"))
 	require.NoError(t, err)
 	latest := map[string]string{}
 	for _, r := range records {
 		latest[r.TxID] = r.Status
 	}
 	assert.Equal(t, "confirmed", latest["FreshBurn9999"], "the superseding record wins")
+}
+
+// fakeBindingAdapter is a chain.Adapter + chain.BindingSource with scripted
+// memo bindings and per-tx cross-check verdicts.
+type fakeBindingAdapter struct {
+	tip      uint64
+	memos    []chain.MemoBinding
+	verdicts map[string]string
+}
+
+func (f *fakeBindingAdapter) Name() string                           { return "eos" }
+func (f *fakeBindingAdapter) ValidateAddress(string) error           { return nil }
+func (f *fakeBindingAdapter) Height(context.Context) (uint64, error) { return f.tip, nil }
+
+func (f *fakeBindingAdapter) BurnCandidates(context.Context, chain.Window) ([]chain.Burn, error) {
+	return nil, nil
+}
+
+func (f *fakeBindingAdapter) CrossCheck(context.Context, chain.Burn, uint64) (chain.Verdict, error) {
+	return chain.Verdict{Status: "confirmed"}, nil
+}
+
+func (f *fakeBindingAdapter) History(_ context.Context, source string, reference, _ uint64) (chain.History, error) {
+	return chain.History{Address: source, ReferenceHeight: reference, Status: "ok"}, nil
+}
+
+func (f *fakeBindingAdapter) Deltas([]json.RawMessage, string) ([]chain.Delta, chain.Status) {
+	return nil, chain.Status{Kind: "ok"}
+}
+
+func (f *fakeBindingAdapter) MemoBindings(context.Context, uint64) ([]chain.MemoBinding, error) {
+	return f.memos, nil
+}
+
+func (f *fakeBindingAdapter) CrossCheckBinding(_ context.Context, mb chain.MemoBinding) (chain.Verdict, error) {
+	status, ok := f.verdicts[mb.TxID]
+	if !ok {
+		status = "confirmed"
+	}
+	return chain.Verdict{Status: status}, nil
+}
+
+func hearthFor(t *testing.T, seed string) string {
+	t.Helper()
+	_, pub, err := crypto.GenerateKeyPair([]byte(seed))
+	require.NoError(t, err)
+	h, err := hearthaddr.New('H', pub)
+	require.NoError(t, err)
+	return h
+}
+
+func TestPollHarvestsMemoBindings(t *testing.T) {
+	dataDir := t.TempDir()
+	first := hearthFor(t, "harvest one")
+	second := hearthFor(t, "harvest two")
+	unconfirmed := hearthFor(t, "harvest unconfirmed")
+	adapter := &fakeBindingAdapter{
+		tip: 508500000,
+		memos: []chain.MemoBinding{
+			{Source: "alicewyl1235", Hearth: first, TxID: "trx-one", Height: 508400100},
+			{Source: "alicewyl1235", Hearth: second, TxID: "trx-two", Height: 508400200},
+			{Source: "bobbuilder12", Hearth: unconfirmed, TxID: "trx-bad", Height: 508400300},
+			{Source: "carolina1234", Hearth: first, TxID: "trx-late", Height: 508600000}, // beyond tip
+		},
+		verdicts: map[string]string{"trx-bad": "mismatch"},
+	}
+	reg, err := bindings.Load(filepath.Join(dataDir, "bindings.jsonl"), 'H')
+	require.NoError(t, err)
+	w := &watcher.Watcher{Adapter: adapter, ChainCfg: testChainConfig(), DataDir: dataDir, Registry: reg}
+
+	require.NoError(t, w.Poll(t.Context()))
+
+	hearth, ok := reg.HearthFor("alicewyl1235")
+	require.True(t, ok)
+	assert.Equal(t, second, hearth, "ascending order applies, the latest memo wins")
+	_, ok = reg.HearthFor("bobbuilder12")
+	assert.False(t, ok, "a cross-check mismatch never enters the registry")
+	_, ok = reg.HearthFor("carolina1234")
+	assert.False(t, ok, "memos beyond the finalized tip wait for the next poll")
+
+	// Re-polling must not grow the artifact.
+	require.NoError(t, w.Poll(t.Context()))
+	records, err := store.ReadJSONL[bindings.Record](filepath.Join(dataDir, "bindings.jsonl"))
+	require.NoError(t, err)
+	assert.Len(t, records, 2)
+	assert.Equal(t, "eos-memo-v1", records[0].Format)
+	assert.Equal(t, "trx-one", records[0].TxID)
 }

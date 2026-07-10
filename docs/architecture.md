@@ -32,7 +32,7 @@ Sources: github.com/wavesplatform/gowaves; docs.waves.tech node REST API referen
 
 ## 3. Patterns
 
-Ports-and-adapters: `internal/chain` defines the ChainAdapter port (`DetectBurns(window)`, `History(address)`, `VerifyBindingSignature(msg, sig, address)`); `internal/chain/waves` is the first adapter, and wave-2 chains plug in without touching the core. Functional core, imperative shell: layers, credit, and Merkle are pure functions with table-driven tests, while IO (node fetch, artifact write) lives at the edges. Pipes: watcher -> JSONL artifacts -> snapshot -> published bundle. No other patterns.
+Ports-and-adapters: `internal/chain` defines the `Adapter` port (`Name`, `ValidateAddress`, `Height`, `BurnCandidates(window)`, `CrossCheck(burn)`, `History(source)`, `Deltas(txs)`) plus the optional `BindingSource` capability (`MemoBindings`, `CrossCheckBinding`) for chains whose bindings ride transfer memos; `internal/chain/waves` and `internal/chain/eos` implement it and `internal/chain/chains` wires slugs to adapters, delta rules and base units (wavelets 1e8, A 1e4). Functional core, imperative shell: layers, credit, and Merkle are pure functions with table-driven tests, while IO (node fetch, artifact write) lives at the edges. Pipes: watcher -> JSONL artifacts -> snapshot -> published bundle. No other patterns.
 
 ## 4. Architecture
 
@@ -49,7 +49,17 @@ two public Waves nodes (independent REST endpoints)
   cmd/snapshot            cmd/api
 ```
 
-`cmd/snapshot` runs layers -> credits -> evidence bundles -> Merkle root, and its `--verify` mode recomputes everything from the artifacts and compares roots. `cmd/api` loads the artifacts into memory and serves GET `/api/preview/waves/<address>` (live fetch plus layer computation), GET `/api/address/<hearth-address>`, GET `/api/stats` (front-page counters: per-chain burn totals, participants, total credit), and POST `/api/bindings`. CORS is answered only for the origins listed in `allowedOrigins` (empty list = no CORS headers). `internal/journal` loads the published weekly price CSV artifact.
+`cmd/snapshot` runs layers -> credits -> evidence bundles -> Merkle root, and its `--verify` mode recomputes everything from the artifacts and compares roots. `cmd/api` loads the artifacts into memory and serves GET `/api/preview/<chain>/<address>` (live history fetch, invariant check, layer computation), GET `/api/address/<hearth-address>`, GET `/api/stats` (front-page counters: per-chain burn totals and windows, participants, total credit), and POST `/api/bindings` (Waves signature formats only). CORS is answered only for the origins listed in `allowedOrigins` (empty list = no CORS headers). `internal/journal` loads the published weekly price CSV artifacts, one per chain (`data/journal/<chain>.csv`).
+
+Per-chain artifacts: `burns.jsonl` and `bindings.jsonl` are shared files whose records carry a `chain` field; transfer histories live under `transfers/<chain>/<source>.jsonl` with a meta head line (invariant verdict, and on truncated-history chains the synthetic opening layer `openingBaseUnits`/`openingAt`). Amounts are `amountBaseUnits` in the chain's smallest unit.
+
+## 4a. EOS/Vaulta adapter
+
+Vaulta is the rebranded EOS mainnet: the native token is `A` on `core.vaulta` (precision 4), legacy `EOS` on `eosio.token` stays live and 1:1 fungible via the on-chain swap, so burns of either token count and histories track the combined balance (a swap nets to zero within its transaction). The provable burn is a plain transfer to `eosio.null` (owner and active permissions are unsatisfiable). Three independent operators feed the adapter: an Antelope chain API node (finality via `last_irreversible_block_num`, final within ~1s under Savanna, so `confirmations: 0`; live balances; account creation dates), a Hyperion v2 index (`historyAPI`, action history and memos, 1000-row pages), and a Greymass legacy v1 `get_transaction` node as the cross-check source.
+
+The public index starts at block 300,000,000 (2023-03-18): instead of the Waves-style exact balance invariant, the remainder between the live combined balance and the replayed deltas becomes a synthetic opening layer dated at that boundary (the truncated floor: pricing since 2023 can only understate deeper history, so credits stay floors and a deep-history upgrade can only raise them). Soundness legs: balance and history come from different operators; the balance is read before and after the history fetch (one retry) so nothing moved in between; a negative remainder blocks the account; an account created after the floor must have no remainder; and layer replay fails on any negative running balance. Histories over 50k actions are blocked to manual review.
+
+Bindings ride transfer memos (`hearth-genesis-binding:v1:<account>:<hearth>` on any transfer from the account to `eosio.null`, including the burn itself; latest wins). The watcher cross-checks each carrying transaction against the secondary before recording format `eos-memo-v1` through the registry's trusted `AddVerified` path; `POST /api/bindings` rejects that format, so an unauthenticated submission can never bind an EOS account.
 
 ## 5. Data layer
 

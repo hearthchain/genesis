@@ -19,10 +19,10 @@ purpose: Remote API deployment, GitHub variables and one-time server bootstrap f
 ```bash
 useradd -m -s /bin/bash hearth
 install -d -o hearth -g hearth /opt/hearth /opt/hearth/bin /opt/hearth/bin.new /opt/hearth/data
-echo 'hearth ALL=(root) NOPASSWD: /usr/bin/systemctl restart hearth-api hearth-watcher' > /etc/sudoers.d/hearth-deploy
+echo 'hearth ALL=(root) NOPASSWD: /usr/bin/systemctl restart hearth-api hearth-watcher hearth-watcher-eos' > /etc/sudoers.d/hearth-deploy
 ```
 
-`/etc/systemd/system/hearth-api.service` (watcher: same unit with `watcher` in place of `api`):
+`/etc/systemd/system/hearth-api.service` (per-chain watchers: same unit with `ExecStart=/opt/hearth/bin/watcher -chain waves -config ...` as `hearth-watcher.service` and `-chain eos` as `hearth-watcher-eos.service`):
 
 ```ini
 [Unit]
@@ -39,12 +39,12 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-Then `systemctl daemon-reload && systemctl enable --now hearth-api hearth-watcher` (first start fails until the operator files below exist; the first workflow run supplies the binaries).
+Then `systemctl daemon-reload && systemctl enable --now hearth-api hearth-watcher hearth-watcher-eos` (first start fails until the operator files below exist; the first workflow run supplies the binaries).
 
 ## Operator-managed files (never deployed by the workflow)
 
-- `/opt/hearth/config.json`: production values: real `window`, `confirmations: 100`, `allowedOrigins: ["https://genesis.hearth.tech"]`, `dataDir: "data"`, `journalCSV: "data/journal/waves.csv"`. Start from `config.example.json`.
-- `/opt/hearth/data/journal/waves.csv`: copy once (`make journal` locally, then scp); refresh when the price journal updates.
+- `/opt/hearth/config.json`: production values: per-chain `chains` blocks with real `window`s (waves `confirmations: 100`, eos `0`), `allowedOrigins: ["https://hearth.tech"]`, `dataDir: "data"`. Start from `config.example.json`.
+- `/opt/hearth/data/journal/{waves,eos}.csv`: copy once (`make journal` locally, then scp); refresh when the price journals update.
 - `/opt/hearth/data/*.jsonl`: the entire state; back it up by cron. Never seed it from a dev machine that ran with `confirmations: 0`.
 
 ## TLS

@@ -35,13 +35,15 @@ func TestStatsAggregatesCreditedBurns(t *testing.T) {
 	assert.Equal(t, float64(0), got["blockedSources"])
 
 	waves := wavesStats(t, got)
-	assert.Equal(t, "100000000000", waves["burnedWavelets"])
-	assert.Equal(t, "0", waves["pendingWavelets"])
+	assert.Equal(t, "100000000000", waves["burnedBaseUnits"])
+	assert.Equal(t, "0", waves["pendingBaseUnits"])
 	byStatus, ok := waves["burnsByStatus"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, float64(1), byStatus["confirmed"])
 
-	window, ok := got["window"].(map[string]any)
+	windows, ok := got["windows"].(map[string]any)
+	require.True(t, ok)
+	window, ok := windows["waves"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, float64(4000000), window["startHeight"])
 	assert.Equal(t, float64(4001000), window["endHeight"])
@@ -53,7 +55,7 @@ func TestStatsCountsPendingBurnsSeparately(t *testing.T) {
 	require.Equal(t, http.StatusCreated, postBinding(t, srv.URL, id, id.sig).StatusCode)
 
 	require.NoError(t, store.AppendJSONL(filepath.Join(serverDataDir, "burns.jsonl"), map[string]any{
-		"txId": "Fresh1", "chain": "waves", "source": id.source, "amountWavelets": 10000000,
+		"txId": "Fresh1", "chain": "waves", "source": id.source, "amountBaseUnits": 10000000,
 		"height": 4000900, "timestamp": "2026-08-01T13:00:00Z", "status": "pending_confirmations",
 	}))
 
@@ -61,8 +63,8 @@ func TestStatsCountsPendingBurnsSeparately(t *testing.T) {
 	assert.Equal(t, "49713174000", got["totalCreditMicro"], "pending burns add no credit")
 
 	waves := wavesStats(t, got)
-	assert.Equal(t, "100000000000", waves["burnedWavelets"])
-	assert.Equal(t, "10000000", waves["pendingWavelets"])
+	assert.Equal(t, "100000000000", waves["burnedBaseUnits"])
+	assert.Equal(t, "10000000", waves["pendingBaseUnits"])
 	byStatus, ok := waves["burnsByStatus"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, float64(1), byStatus["confirmed"])
@@ -88,13 +90,13 @@ func TestStatsDeduplicatesSupersededBurnRows(t *testing.T) {
 	// The watcher appends a status update for an already-recorded burn: the
 	// latest row per txId wins, the amount is counted once.
 	require.NoError(t, store.AppendJSONL(filepath.Join(serverDataDir, "burns.jsonl"), map[string]any{
-		"txId": "B1", "chain": "waves", "source": id.source, "amountWavelets": 100000000000,
+		"txId": "B1", "chain": "waves", "source": id.source, "amountBaseUnits": 100000000000,
 		"height": 4000010, "timestamp": "2026-08-01T12:00:00Z", "status": "confirmed",
 	}))
 
 	got := getJSON(t, srv.URL+"/api/stats")
 	waves := wavesStats(t, got)
-	assert.Equal(t, "100000000000", waves["burnedWavelets"])
+	assert.Equal(t, "100000000000", waves["burnedBaseUnits"])
 	byStatus, ok := waves["burnsByStatus"].(map[string]any)
 	require.True(t, ok)
 	assert.Equal(t, float64(1), byStatus["confirmed"])

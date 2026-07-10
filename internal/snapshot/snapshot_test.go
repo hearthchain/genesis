@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,6 +28,11 @@ func loadJournal(t *testing.T) *journal.Journal {
 	j, err := journal.Load("../../data/journal/waves.csv")
 	require.NoError(t, err)
 	return j
+}
+
+func journals(t *testing.T) map[string]*journal.Journal {
+	t.Helper()
+	return map[string]*journal.Journal{"waves": loadJournal(t)}
 }
 
 // seedIdentity derives a real Waves source address and a bound Hearth address.
@@ -55,7 +61,7 @@ func writeArtifacts(t *testing.T) (dataDir, hearth, strangerSource string) {
 
 	burn := func(id, src string, amount uint64, height uint64) map[string]any {
 		return map[string]any{
-			"txId": id, "chain": "waves", "source": src, "amountWavelets": amount,
+			"txId": id, "chain": "waves", "source": src, "amountBaseUnits": amount,
 			"height": height, "timestamp": "2026-08-01T12:00:00Z", "status": "confirmed",
 		}
 	}
@@ -69,7 +75,7 @@ func writeArtifacts(t *testing.T) (dataDir, hearth, strangerSource string) {
 			itoa(burnAmount) + `,"fee":100000,"feeAssetId":null,"timestamp":1754049600000,"height":4000010}`
 		meta := store.TransferMeta{Address: src, ReferenceHeight: 4000100, Status: "ok"}
 		require.NoError(t, store.WriteTransfers(
-			filepath.Join(dataDir, "transfers", src+".jsonl"), meta,
+			filepath.Join(dataDir, "transfers", "waves", src+".jsonl"), meta,
 			[]jsonRaw{jsonRaw(depositTx), jsonRaw(burnTx)}))
 	}
 	writeHistory(source, "B1", 200_000_000_000, 100_000_000_000)
@@ -85,7 +91,7 @@ func writeArtifacts(t *testing.T) (dataDir, hearth, strangerSource string) {
 func TestBuildAggregatesCreditsAndSeparatesPending(t *testing.T) {
 	dataDir, hearth, stranger := writeArtifacts(t)
 
-	snap, bundles, err := snapshot.Build(dataDir, loadJournal(t), 'H')
+	snap, bundles, err := snapshot.Build(dataDir, journals(t), 'H')
 	require.NoError(t, err)
 
 	require.Len(t, snap.Entries, 1)
@@ -104,9 +110,39 @@ func TestBuildAggregatesCreditsAndSeparatesPending(t *testing.T) {
 	assert.Empty(t, byTx["X1"])
 }
 
+func TestBuildPricesSyntheticOpeningLayer(t *testing.T) {
+	// A truncated-history chain: the pre-index remainder arrives as an opening
+	// layer in the transfers meta. Here 2000 WAVES-equivalent open at the
+	// March 2022 boundary and the burn consumes half at that layer's price.
+	dataDir := t.TempDir()
+	source, h, pub, sig := seedIdentity(t, "snapshot opening burner")
+	require.NoError(t, store.AppendJSONL(filepath.Join(dataDir, "burns.jsonl"), map[string]any{
+		"txId": "O1", "chain": "waves", "source": source, "amountBaseUnits": 100_000_000_000,
+		"height": 4000010, "timestamp": "2026-08-01T12:00:00Z", "status": "confirmed",
+	}))
+	burnTx := `{"type":4,"id":"O1","sender":"` + source + `","recipient":"3PHearthBurnXXXXXXXXXXXXXXXXXZgJXd1","assetId":null,"amount":100000000000,"fee":100000,"feeAssetId":null,"timestamp":1754049600000,"height":4000010}`
+	meta := store.TransferMeta{
+		Address: source, Chain: "waves", ReferenceHeight: 4000100, Status: "ok",
+		OpeningBaseUnits: 200_000_000_000,
+		OpeningAt:        time.Date(2022, 3, 14, 0, 0, 0, 0, time.UTC),
+	}
+	require.NoError(t, store.WriteTransfers(
+		filepath.Join(dataDir, "transfers", "waves", source+".jsonl"), meta, []jsonRaw{jsonRaw(burnTx)}))
+	reg, err := bindings.Load(filepath.Join(dataDir, "bindings.jsonl"), 'H')
+	require.NoError(t, err)
+	require.NoError(t, reg.Add(bindings.Record{Source: source, Chain: "waves", Hearth: h, PublicKey: pub, Signature: sig}))
+
+	snap, _, err := snapshot.Build(dataDir, journals(t), 'H')
+	require.NoError(t, err)
+
+	require.Len(t, snap.Entries, 1)
+	assert.Equal(t, "49713174000", snap.Entries[0].CreditMicro,
+		"the opening layer is dated at the truncation boundary and priced from there")
+}
+
 func TestWriteThenVerifyRoundTripsAndDetectsTampering(t *testing.T) {
 	dataDir, _, _ := writeArtifacts(t)
-	j := loadJournal(t)
+	j := journals(t)
 
 	snap, bundles, err := snapshot.Build(dataDir, j, 'H')
 	require.NoError(t, err)

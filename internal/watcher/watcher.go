@@ -1,67 +1,57 @@
-// Package watcher runs the burn-window loop: detect burns on the primary
-// node, cross-check each against the secondary, and persist burn records plus
-// the source-address transfer histories the credit formula needs. Every poll
-// rescans the whole window and skips what is already recorded, so the watcher
-// is idempotent and crash-safe with no state beyond the artifacts.
+// Package watcher runs the burn-window loop: detect burns via the chain
+// adapter, cross-check each against the independent secondary source, and
+// persist burn records plus the source-address transfer histories the credit
+// formula needs. Every poll rescans the whole window and skips what is
+// already recorded, so the watcher is idempotent and crash-safe with no state
+// beyond the artifacts.
 package watcher
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"sort"
 	"time"
 
+	"github.com/hearthchain/burning-page/internal/bindings"
 	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/store"
 )
 
-// Node is the read surface the watcher needs from a Waves node; *waves.Client
-// and the file-backed fixture node both satisfy it.
-type Node interface {
-	AllTransactions(ctx context.Context, addr string) ([]json.RawMessage, error)
-	Height(ctx context.Context) (uint64, error)
-	BalanceAfterConfirmations(ctx context.Context, addr string, confirmations uint64) (uint64, error)
-	TransactionInfo(ctx context.Context, id string) (json.RawMessage, error)
-}
+// statusConfirmed is the terminal success status shared by burns and
+// binding cross-checks.
+const statusConfirmed = "confirmed"
 
 // BurnRecord is one burns.jsonl line; a later line with the same TxID
 // supersedes an earlier one (pending burns get re-checked on later polls).
 type BurnRecord struct {
 	chain.Burn
 	Status     string        `json:"status"`
-	CrossCheck waves.Verdict `json:"crossCheck"`
+	CrossCheck chain.Verdict `json:"crossCheck"`
 	DetectedAt time.Time     `json:"detectedAt"`
 }
 
-const statusUnsupported = "unsupported"
-
-// Watcher polls one chain (Waves mainnet) for burns.
+// Watcher polls one chain for burns through its adapter.
 type Watcher struct {
-	Primary   Node
-	Secondary Node
-	Cfg       config.Config
+	Adapter  chain.Adapter
+	ChainCfg config.ChainConfig
+	DataDir  string
+	// Registry receives on-chain memo bindings when the adapter is a
+	// chain.BindingSource; nil disables harvesting (the Waves watcher).
+	Registry *bindings.Registry
 }
 
 // Poll performs one full-window pass.
 func (w *Watcher) Poll(ctx context.Context) error {
-	tip, err := w.Primary.Height(ctx)
+	tip, err := w.Adapter.Height(ctx)
 	if err != nil {
 		return err
 	}
-	if tip <= w.Cfg.Confirmations {
+	if tip <= w.ChainCfg.Confirmations {
 		return nil
 	}
-	txs, err := w.Primary.AllTransactions(ctx, w.Cfg.BurnAddress)
-	if err != nil {
-		return err
-	}
-	burns, err := waves.DetectBurns(txs, w.Cfg.BurnAddress, w.Cfg.Window)
+	burns, err := w.Adapter.BurnCandidates(ctx, w.ChainCfg.Window)
 	if err != nil {
 		return err
 	}
@@ -74,10 +64,50 @@ func (w *Watcher) Poll(ctx context.Context) error {
 			return pErr
 		}
 	}
+	return w.harvestBindings(ctx, tip)
+}
+
+// harvestBindings records the chain's memo bindings: each one is
+// cross-checked against the secondary source before it enters the registry,
+// exactly like a burn. Memos are applied in ascending chain order so the
+// latest one per source wins; already-recorded transactions are skipped, so
+// the append-only artifact does not grow on idle polls.
+func (w *Watcher) harvestBindings(ctx context.Context, tip uint64) error {
+	source, ok := w.Adapter.(chain.BindingSource)
+	if !ok || w.Registry == nil {
+		return nil
+	}
+	memos, err := source.MemoBindings(ctx, w.ChainCfg.Window.Start)
+	if err != nil {
+		return err
+	}
+	for _, mb := range memos {
+		if mb.Height > tip || w.Registry.SeenTx(mb.TxID) {
+			continue
+		}
+		verdict, cErr := source.CrossCheckBinding(ctx, mb)
+		if cErr != nil {
+			return cErr
+		}
+		if verdict.Status != statusConfirmed {
+			continue
+		}
+		rec := bindings.Record{
+			Source: mb.Source,
+			Chain:  w.Adapter.Name(),
+			Hearth: mb.Hearth,
+			Format: "eos-memo-v1",
+			TxID:   mb.TxID,
+		}
+		if aErr := w.Registry.AddVerified(rec); aErr != nil {
+			return aErr
+		}
+		slog.Info("binding recorded", "source", mb.Source, "hearth", mb.Hearth, "txId", mb.TxID)
+	}
 	return nil
 }
 
-func (w *Watcher) burnsPath() string { return filepath.Join(w.Cfg.DataDir, "burns.jsonl") }
+func (w *Watcher) burnsPath() string { return filepath.Join(w.DataDir, "burns.jsonl") }
 
 func (w *Watcher) latestRecords() (map[string]BurnRecord, error) {
 	records, err := store.ReadJSONL[BurnRecord](w.burnsPath())
@@ -93,10 +123,10 @@ func (w *Watcher) latestRecords() (map[string]BurnRecord, error) {
 
 func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[string]BurnRecord, tip uint64) error {
 	prev, seen := latest[b.TxID]
-	if seen && (prev.Status == "confirmed" || prev.Status == "mismatch") {
+	if seen && (prev.Status == statusConfirmed || prev.Status == "mismatch") {
 		return nil
 	}
-	if b.Height+w.Cfg.Confirmations > tip {
+	if b.Height+w.ChainCfg.Confirmations > tip {
 		if seen {
 			return nil // already visible as pending; nothing changed
 		}
@@ -107,7 +137,7 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 		slog.Info("burn recorded", "txId", b.TxID, "source", b.Source, "amount", b.Amount, "status", rec.Status)
 		return nil
 	}
-	verdict, err := waves.CrossCheck(ctx, w.Secondary, b, w.Cfg.Confirmations)
+	verdict, err := w.Adapter.CrossCheck(ctx, b, w.ChainCfg.Confirmations)
 	if err != nil {
 		return err
 	}
@@ -119,7 +149,7 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 		return aErr
 	}
 	slog.Info("burn recorded", "txId", b.TxID, "source", b.Source, "amount", b.Amount, "status", verdict.Status)
-	if verdict.Status != "confirmed" {
+	if verdict.Status != statusConfirmed {
 		return nil
 	}
 	return w.ensureHistory(ctx, b.Source, tip)
@@ -128,69 +158,27 @@ func (w *Watcher) processBurn(ctx context.Context, b chain.Burn, latest map[stri
 // ensureHistory fetches, verifies and persists the transfer history of a
 // source address once; the artifact is the credit formula's input.
 func (w *Watcher) ensureHistory(ctx context.Context, source string, tip uint64) error {
-	path := filepath.Join(w.Cfg.DataDir, "transfers", source+".jsonl")
+	path := filepath.Join(w.DataDir, "transfers", w.Adapter.Name(), source+".jsonl")
 	if _, err := os.Stat(path); err == nil {
 		return nil
 	}
-	txs, err := w.Primary.AllTransactions(ctx, source)
+	reference := min(w.ChainCfg.Window.End, tip-w.ChainCfg.Confirmations)
+	h, err := w.Adapter.History(ctx, source, reference, tip)
 	if err != nil {
 		return err
 	}
-	sortByHeightAscending(txs)
-	reference := min(w.Cfg.Window.End, tip-w.Cfg.Confirmations)
 	meta := store.TransferMeta{
-		Address:         source,
-		FetchedAt:       time.Now().UTC(),
-		ReferenceHeight: reference,
+		Address:          source,
+		Chain:            w.Adapter.Name(),
+		FetchedAt:        time.Now().UTC(),
+		ReferenceHeight:  h.ReferenceHeight,
+		NodeBalance:      h.NodeBalance,
+		Recomputed:       h.Recomputed,
+		OpeningBaseUnits: h.OpeningBaseUnits,
+		OpeningAt:        h.OpeningAt,
+		Status:           h.Status,
+		Reason:           h.Reason,
 	}
-	res := w.invariant(ctx, txs, source, reference, tip)
-	meta.Status, meta.Reason, meta.Recomputed, meta.NodeBalance = res.status, res.reason, res.sum, res.balance
 	slog.Info("history recorded", "source", source, "status", meta.Status, "reason", meta.Reason)
-	return store.WriteTransfers(path, meta, txs)
-}
-
-// invariant recomputes the balance from deltas up to the reference height and
-// requires exact equality with the node-reported balance at that height.
-// A wrong credit is unrecoverable; a blocked address is recoverable, so any
-// doubt resolves to "unsupported".
-type invariantResult struct {
-	status  string
-	reason  string
-	sum     int64
-	balance uint64
-}
-
-func (w *Watcher) invariant(
-	ctx context.Context, txs []json.RawMessage, source string, reference, tip uint64,
-) invariantResult {
-	deltas, deltaStatus := waves.Deltas(txs, source)
-	if deltaStatus.Kind != "ok" {
-		return invariantResult{status: statusUnsupported, reason: deltaStatus.Reason}
-	}
-	var sum int64
-	for _, d := range deltas {
-		if d.Height <= reference {
-			sum += d.Amount
-		}
-	}
-	balance, err := w.Primary.BalanceAfterConfirmations(ctx, source, tip-reference)
-	if err != nil {
-		return invariantResult{status: statusUnsupported, reason: fmt.Sprintf("balance fetch failed: %v", err), sum: sum}
-	}
-	if sum < 0 || uint64(sum) != balance {
-		reason := fmt.Sprintf("recomputed %d != node balance %d at height %d", sum, balance, reference)
-		return invariantResult{status: statusUnsupported, reason: reason, sum: sum, balance: balance}
-	}
-	return invariantResult{status: "ok", sum: sum, balance: balance}
-}
-
-func sortByHeightAscending(txs []json.RawMessage) {
-	height := func(raw json.RawMessage) uint64 {
-		var peek struct {
-			Height uint64 `json:"height"`
-		}
-		_ = json.Unmarshal(raw, &peek) // undecodable rows sort first and fail later checks
-		return peek.Height
-	}
-	sort.SliceStable(txs, func(i, j int) bool { return height(txs[i]) < height(txs[j]) })
+	return store.WriteTransfers(path, meta, h.Txs)
 }

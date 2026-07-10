@@ -20,7 +20,7 @@ type Bundle struct {
 	Chain           string               `json:"chain"`
 	Source          string               `json:"source"`
 	Hearth          string               `json:"hearth,omitempty"`
-	AmountWavelets  uint64               `json:"amountWavelets"`
+	AmountBaseUnits uint64               `json:"amountBaseUnits"`
 	Height          uint64               `json:"height"`
 	Layers          []credit.LayerCredit `json:"layers"`
 	CreditMicro     string               `json:"creditMicro"`

@@ -12,11 +12,13 @@ import (
 
 	"github.com/hearthchain/burning-page/internal/api"
 	"github.com/hearthchain/burning-page/internal/bindings"
+	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/burning-page/internal/chain/waves"
 	"github.com/hearthchain/burning-page/internal/config"
 	"github.com/hearthchain/burning-page/internal/journal"
 )
 
-const pagesOrigin = "https://genesis.hearth.tech"
+const pagesOrigin = "https://hearth.tech"
 
 // corsServer is a bare server with no artifacts: CORS behavior is independent
 // of the data underneath.
@@ -30,7 +32,9 @@ func corsServer(t *testing.T, origins []string) *httptest.Server {
 	cfg.DataDir = t.TempDir()
 	cfg.HearthScheme = "H"
 	cfg.AllowedOrigins = origins
-	srv := httptest.NewServer(api.New(&fakeNode{}, j, reg, cfg).Handler())
+	srv := httptest.NewServer(api.New(
+		map[string]chain.Adapter{"waves": &waves.Adapter{Primary: &fakeNode{}}},
+		map[string]*journal.Journal{"waves": j}, reg, cfg).Handler())
 	t.Cleanup(srv.Close)
 	return srv
 }

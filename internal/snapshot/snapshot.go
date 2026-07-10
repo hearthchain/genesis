@@ -11,7 +11,8 @@ import (
 	"sort"
 
 	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
+	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/burning-page/internal/chain/chains"
 	"github.com/hearthchain/burning-page/internal/credit"
 	"github.com/hearthchain/burning-page/internal/evidence"
 	"github.com/hearthchain/burning-page/internal/journal"
@@ -41,13 +42,14 @@ type burnRow struct {
 	TxID   string `json:"txId"`
 	Chain  string `json:"chain"`
 	Source string `json:"source"`
-	Amount uint64 `json:"amountWavelets"`
+	Amount uint64 `json:"amountBaseUnits"`
 	Height uint64 `json:"height"`
 	Status string `json:"status"`
 }
 
 // Build computes the snapshot and the evidence bundles from a data directory.
-func Build(dataDir string, j *journal.Journal, hearthScheme byte) (Snapshot, []evidence.Bundle, error) {
+// journals maps each chain slug to its weekly price journal.
+func Build(dataDir string, journals map[string]*journal.Journal, hearthScheme byte) (Snapshot, []evidence.Bundle, error) {
 	confirmed, err := confirmedBurnsBySource(filepath.Join(dataDir, "burns.jsonl"))
 	if err != nil {
 		return Snapshot{}, nil, err
@@ -64,7 +66,7 @@ func Build(dataDir string, j *journal.Journal, hearthScheme byte) (Snapshot, []e
 		total   = new(big.Int)
 	)
 	for _, source := range sortedKeys(confirmed) {
-		srcBundles, credited, verdict, srcErr := creditSource(dataDir, j, source, confirmed[source], reg)
+		srcBundles, credited, verdict, srcErr := creditSource(dataDir, journals, source, confirmed[source], reg)
 		if srcErr != nil {
 			return Snapshot{}, nil, srcErr
 		}
@@ -105,18 +107,43 @@ const (
 // creditSource prices all burns of one source address against its verified
 // transfer history. Blocked histories yield no bundles; unbound sources yield
 // bundles without a Hearth destination and stay out of the totals.
+// chainRules resolves the per-chain pieces of the credit pipeline.
+func chainRules(
+	journals map[string]*journal.Journal, chainName string,
+) (*journal.Journal, chains.DeltaFunc, uint64, error) {
+	j, ok := journals[chainName]
+	if !ok {
+		return nil, nil, 0, fmt.Errorf("snapshot: no journal for chain %q", chainName)
+	}
+	deltasFor, err := chains.DeltasFor(chainName)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("snapshot: %w", err)
+	}
+	units, err := chains.BaseUnits(chainName)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("snapshot: %w", err)
+	}
+	return j, deltasFor, units, nil
+}
+
 func creditSource(
-	dataDir string, j *journal.Journal, source string, burns []burnRow, reg *bindings.Registry,
+	dataDir string, journals map[string]*journal.Journal, source string, burns []burnRow, reg *bindings.Registry,
 ) ([]evidence.Bundle, *big.Int, string, error) {
-	transfersPath := filepath.Join(dataDir, "transfers", source+".jsonl")
+	chainName := burns[0].Chain
+	j, deltasFor, units, err := chainRules(journals, chainName)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	transfersPath := filepath.Join(dataDir, "transfers", chainName, source+".jsonl")
 	meta, txs, err := store.ReadTransfers(transfersPath)
 	if err != nil || meta.Status != "ok" {
 		return nil, nil, sourceBlocked, nil //nolint:nilerr // a missing or failed history blocks the source, not the snapshot
 	}
-	deltas, status := waves.Deltas(txs, source)
+	deltas, status := deltasFor(txs, source)
 	if status.Kind != "ok" {
 		return nil, nil, sourceBlocked, nil
 	}
+	deltas = chain.WithOpening(deltas, meta.OpeningBaseUnits, meta.OpeningAt)
 	burnAmounts := make(map[string]uint64, len(burns))
 	for _, b := range burns {
 		burnAmounts[b.TxID] = b.Amount
@@ -134,7 +161,7 @@ func creditSource(
 	credited := new(big.Int)
 	bundles := make([]evidence.Bundle, 0, len(burns))
 	for _, b := range burns {
-		totalMic, perLayer, cErr := credit.Compute(consumed[b.TxID], j)
+		totalMic, perLayer, cErr := credit.Compute(consumed[b.TxID], j, units)
 		if cErr != nil {
 			return nil, nil, "", fmt.Errorf("snapshot: %s: %w", b.TxID, cErr)
 		}
@@ -142,7 +169,7 @@ func creditSource(
 			TxID:            b.TxID,
 			Chain:           b.Chain,
 			Source:          source,
-			AmountWavelets:  b.Amount,
+			AmountBaseUnits: b.Amount,
 			Height:          b.Height,
 			Layers:          perLayer,
 			CreditMicro:     totalMic.String(),

@@ -9,27 +9,19 @@ import (
 	"github.com/hearthchain/burning-page/internal/chain"
 )
 
-// Status is the verdict of a delta reconstruction: Kind "ok" or "unsupported"
-// (the history contains a transaction type the MVP does not interpret; the
-// address is blocked to manual review rather than risking a wrong credit).
-type Status struct {
-	Kind   string
-	Reason string
-}
-
 // Deltas reconstructs the signed WAVES balance changes of addr from its full
 // transaction history. Supported types: Genesis, Payment, Transfer and
 // MassTransfer; anything else yields an unsupported status.
-func Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, Status) {
+func Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, chain.Status) {
 	deltas := make([]chain.Delta, 0, len(txs))
 	for _, raw := range txs {
 		var tx deltaTx
 		if err := json.Unmarshal(raw, &tx); err != nil {
-			return nil, Status{Kind: "unsupported", Reason: fmt.Sprintf("undecodable transaction: %v", err)}
+			return nil, chain.Status{Kind: chain.StatusUnsupported, Reason: fmt.Sprintf("undecodable transaction: %v", err)}
 		}
 		amount, ok := tx.deltaFor(addr)
 		if !ok {
-			return nil, Status{Kind: "unsupported", Reason: fmt.Sprintf("transaction type %d (id %s)", tx.Type, tx.ID)}
+			return nil, chain.Status{Kind: chain.StatusUnsupported, Reason: fmt.Sprintf("transaction type %d (id %s)", tx.Type, tx.ID)}
 		}
 		deltas = append(deltas, chain.Delta{
 			TxID:      tx.ID,
@@ -39,7 +31,7 @@ func Deltas(txs []json.RawMessage, addr string) ([]chain.Delta, Status) {
 		})
 	}
 	sort.SliceStable(deltas, func(i, j int) bool { return deltas[i].Height < deltas[j].Height })
-	return deltas, Status{Kind: "ok"}
+	return deltas, chain.Status{Kind: chain.StatusOK}
 }
 
 // deltaTx is the projection of a node transaction the delta rules read.

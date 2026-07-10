@@ -8,15 +8,6 @@ import (
 	"github.com/hearthchain/burning-page/internal/chain"
 )
 
-// Verdict is the outcome of a double-source check: confirmed, mismatch (with
-// the diverging field names) or pending_crosscheck while the second node has
-// not yet buried the burn under enough confirmations.
-type Verdict struct {
-	Status     string   `json:"status"`
-	Node       string   `json:"node,omitempty"`
-	Mismatches []string `json:"mismatchFields,omitempty"`
-}
-
 // canonicalTx is the field set compared across the two nodes. Formatting and
 // node-specific extras are irrelevant; these fields define the burn.
 type canonicalTx struct {
@@ -45,26 +36,26 @@ type Node interface {
 // CrossCheck re-fetches a burn from the secondary node and compares the
 // canonical fields. A lagging secondary is not a mismatch: the burn stays
 // pending and is retried on the next poll.
-func CrossCheck(ctx context.Context, secondary Node, burn chain.Burn, confirmations uint64) (Verdict, error) {
+func CrossCheck(ctx context.Context, secondary Node, burn chain.Burn, confirmations uint64) (chain.Verdict, error) {
 	tip, err := secondary.Height(ctx)
 	if err != nil {
-		return Verdict{}, err
+		return chain.Verdict{}, err
 	}
 	if tip < burn.Height+confirmations {
-		return Verdict{Status: "pending_crosscheck"}, nil
+		return chain.Verdict{Status: "pending_crosscheck"}, nil
 	}
 	theirs, err := secondary.TransactionInfo(ctx, burn.TxID)
 	if err != nil {
-		return Verdict{}, err
+		return chain.Verdict{}, err
 	}
 	mismatches, err := compareCanonical(burn.Raw, theirs)
 	if err != nil {
-		return Verdict{}, err
+		return chain.Verdict{}, err
 	}
 	if len(mismatches) > 0 {
-		return Verdict{Status: "mismatch", Mismatches: mismatches}, nil
+		return chain.Verdict{Status: "mismatch", Mismatches: mismatches}, nil
 	}
-	return Verdict{Status: "confirmed"}, nil
+	return chain.Verdict{Status: "confirmed"}, nil
 }
 
 func compareCanonical(ours, theirs json.RawMessage) ([]string, error) {
