@@ -1,4 +1,4 @@
-module github.com/hearthchain/burning-page
+module github.com/hearthchain/genesis
 
 go 1.26.2
 

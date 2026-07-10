@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/api"
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/journal"
+	"github.com/hearthchain/genesis/internal/api"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/waves"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/journal"
 )
 
 const pagesOrigin = "https://hearth.tech"

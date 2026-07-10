@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 type rec struct {

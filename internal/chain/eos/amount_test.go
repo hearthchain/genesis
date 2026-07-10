@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/chain/eos"
+	"github.com/hearthchain/genesis/internal/chain/eos"
 )
 
 func TestParseQuantityAcceptsBothNativeTokens(t *testing.T) {

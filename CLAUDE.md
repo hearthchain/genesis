@@ -1,10 +1,10 @@
 ---
-purpose: Agent baseline for burning-page (genesis burn backend + frontend)
+purpose: Agent baseline for the genesis repo (burn backend + frontend)
 ---
 
-# burning-page
+# genesis
 
-Genesis burn application for Hearth (HRTH): Go backend that detects burns of faded L1 tokens on their home chains, reconstructs min-balance layers, computes credits at each layer's max weekly-average price, and builds the genesis snapshot; plus the static genesis frontend served at hearth.tech/burning-page/. The backend is a cache, never an authority: every number is recomputable from public chain data plus published JSONL artifacts.
+Genesis burn application for Hearth (HRTH): Go backend that detects burns of faded L1 tokens on their home chains, reconstructs min-balance layers, computes credits at each layer's max weekly-average price, and builds the genesis snapshot; plus the static genesis frontend served at hearth.tech/genesis/. The backend is a cache, never an authority: every number is recomputable from public chain data plus published JSONL artifacts.
 
 Keep this file short; when you update it, ALWAYS be very laconic.
 

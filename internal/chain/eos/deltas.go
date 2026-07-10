@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // The two token contracts whose transfers move the combined native balance.

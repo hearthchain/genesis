@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/eos"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/eos"
 )
 
 // recordedAdapter wires the adapter over one httptest server replaying the

@@ -13,10 +13,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 // statusConfirmed is the terminal success status shared by burns and

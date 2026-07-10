@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/config"
+	"github.com/hearthchain/genesis/internal/config"
 )
 
 func TestLoadExampleConfig(t *testing.T) {

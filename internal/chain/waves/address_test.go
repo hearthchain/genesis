@@ -9,7 +9,7 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/chain/waves"
+	"github.com/hearthchain/genesis/internal/chain/waves"
 )
 
 func TestUnspendableIsDeterministicPinnedBurnAddress(t *testing.T) {

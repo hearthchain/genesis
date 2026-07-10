@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
 )
 
 func TestValidateAcceptsKeyDerivedHearthAddress(t *testing.T) {

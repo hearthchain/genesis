@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/chains"
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/watcher"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/chains"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/watcher"
 )
 
 const pollInterval = 60 * time.Second // ~Waves block time; polling faster buys nothing

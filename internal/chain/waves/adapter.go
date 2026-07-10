@@ -8,7 +8,7 @@ import (
 
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // PrimaryNode is the read surface the adapter needs from the primary node;

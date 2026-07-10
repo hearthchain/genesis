@@ -9,9 +9,9 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
 )
 
 func signedRecord(t *testing.T, seed, hearthSeed string) bindings.Record {

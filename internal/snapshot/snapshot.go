@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 	"sort"
 
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/chains"
-	"github.com/hearthchain/burning-page/internal/credit"
-	"github.com/hearthchain/burning-page/internal/evidence"
-	"github.com/hearthchain/burning-page/internal/journal"
-	"github.com/hearthchain/burning-page/internal/layers"
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/chains"
+	"github.com/hearthchain/genesis/internal/credit"
+	"github.com/hearthchain/genesis/internal/evidence"
+	"github.com/hearthchain/genesis/internal/journal"
+	"github.com/hearthchain/genesis/internal/layers"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 // Entry is one snapshot line: a Hearth address and its total credit.

@@ -4,7 +4,7 @@ package main
 import (
 	"os"
 
-	"github.com/hearthchain/burning-page/internal/bindsign"
+	"github.com/hearthchain/genesis/internal/bindsign"
 )
 
 func main() {

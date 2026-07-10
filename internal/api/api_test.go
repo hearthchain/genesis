@@ -16,15 +16,15 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/api"
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
-	"github.com/hearthchain/burning-page/internal/journal"
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/api"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/waves"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/journal"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 type fakeNode struct {

@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // Deltas reconstructs the signed WAVES balance changes of addr from its full

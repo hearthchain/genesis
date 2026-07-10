@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/snapshot"
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/snapshot"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 // chainStats aggregates the burn artifact of one chain for the public

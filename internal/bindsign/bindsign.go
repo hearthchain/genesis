@@ -16,8 +16,8 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
 )
 
 // Exit codes: exitErr for operational failures, exitUsage for bad invocation.

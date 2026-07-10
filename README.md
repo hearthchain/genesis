@@ -2,7 +2,7 @@
 purpose: Genesis burn application, burn-window web app plus backend pipeline (watchers, credit engine, snapshot builder)
 ---
 
-# burning-page
+# genesis
 
 The genesis burn application for Hearth (HRTH). Users provably burn tokens of ten faded L1 chains during the genesis window and receive HRTH credits, one credit per HRTH token at network launch. This repo holds the whole genesis burn application: the static web frontend and the Go backend pipeline that detects burns, computes credits, and builds the genesis snapshot. Mechanics, user path, chain table, and open questions live in the spec: [`hearthchain/strategy/genesis-burn-tz.md`](../strategy/genesis-burn-tz.md).
 

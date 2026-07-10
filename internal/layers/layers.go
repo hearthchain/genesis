@@ -11,7 +11,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // Layer is a quantity of coins continuously present on the address since a date.

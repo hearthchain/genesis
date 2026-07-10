@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hearthchain/burning-page/internal/credit"
+	"github.com/hearthchain/genesis/internal/credit"
 )
 
 // Bundle is one published credit proof.

@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/bindings"
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/chains"
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/journal"
-	"github.com/hearthchain/burning-page/internal/snapshot"
-	"github.com/hearthchain/burning-page/internal/store"
-	"github.com/hearthchain/burning-page/internal/watcher"
+	"github.com/hearthchain/genesis/internal/bindings"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/chains"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/journal"
+	"github.com/hearthchain/genesis/internal/snapshot"
+	"github.com/hearthchain/genesis/internal/store"
+	"github.com/hearthchain/genesis/internal/watcher"
 )
 
 // TestEosFixtureEndToEnd drives the whole EOS pipeline offline: the fixture

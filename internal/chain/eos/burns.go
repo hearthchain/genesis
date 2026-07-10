@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // Chain is the chain slug used in artifacts, routes and config.

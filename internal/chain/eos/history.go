@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // ChainAPI is the finality/balance/account surface of a chain API node;

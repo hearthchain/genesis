@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // ChainConfig is the per-chain block of the shared config: which public

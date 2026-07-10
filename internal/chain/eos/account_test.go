@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hearthchain/burning-page/internal/chain/eos"
+	"github.com/hearthchain/genesis/internal/chain/eos"
 )
 
 func TestValidateAccountAcceptsAntelopeNames(t *testing.T) {

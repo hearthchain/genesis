@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/credit"
-	"github.com/hearthchain/burning-page/internal/journal"
-	"github.com/hearthchain/burning-page/internal/layers"
+	"github.com/hearthchain/genesis/internal/credit"
+	"github.com/hearthchain/genesis/internal/journal"
+	"github.com/hearthchain/genesis/internal/layers"
 )
 
 func loadJournal(t *testing.T) *journal.Journal {

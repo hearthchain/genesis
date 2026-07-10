@@ -7,9 +7,9 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/hearthchain/burning-page/internal/config"
-	"github.com/hearthchain/burning-page/internal/journal"
-	"github.com/hearthchain/burning-page/internal/snapshot"
+	"github.com/hearthchain/genesis/internal/config"
+	"github.com/hearthchain/genesis/internal/journal"
+	"github.com/hearthchain/genesis/internal/snapshot"
 )
 
 func main() { os.Exit(run()) }

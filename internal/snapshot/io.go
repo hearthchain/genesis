@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/hearthchain/burning-page/internal/evidence"
-	"github.com/hearthchain/burning-page/internal/journal"
+	"github.com/hearthchain/genesis/internal/evidence"
+	"github.com/hearthchain/genesis/internal/journal"
 )
 
 const (

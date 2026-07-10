@@ -11,7 +11,7 @@ import (
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 	"github.com/wavesplatform/gowaves/pkg/proto"
 
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
 )
 
 // Errors distinguish the caller-facing failure classes of Verify.

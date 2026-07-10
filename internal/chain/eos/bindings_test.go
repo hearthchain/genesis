@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/wavesplatform/gowaves/pkg/crypto"
 
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/chain/eos"
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/chain/eos"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
 )
 
 func bindingMemo(source, hearth string) string {

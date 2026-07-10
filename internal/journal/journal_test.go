@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/journal"
+	"github.com/hearthchain/genesis/internal/journal"
 )
 
 const wavesCSV = "../../data/journal/waves.csv"

@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/hearthchain/burning-page/internal/chain"
-	"github.com/hearthchain/burning-page/internal/chain/eos"
-	"github.com/hearthchain/burning-page/internal/chain/waves"
-	"github.com/hearthchain/burning-page/internal/config"
+	"github.com/hearthchain/genesis/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain/eos"
+	"github.com/hearthchain/genesis/internal/chain/waves"
+	"github.com/hearthchain/genesis/internal/config"
 )
 
 // New builds the live adapter for the named chain from its config block.

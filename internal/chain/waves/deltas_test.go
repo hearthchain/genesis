@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hearthchain/burning-page/internal/chain/waves"
+	"github.com/hearthchain/genesis/internal/chain/waves"
 )
 
 const me = "3PMeMeMeMeMeMeMeMeMeMeMeMeMeMeMeMe1"

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // Transaction type ids of the Waves protocol that the MVP interprets.

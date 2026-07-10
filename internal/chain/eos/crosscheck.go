@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/chain"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/chain"
 )
 
 // Secondary is the read surface CrossCheck needs from the second source;

@@ -9,9 +9,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hearthchain/burning-page/internal/binding"
-	"github.com/hearthchain/burning-page/internal/hearthaddr"
-	"github.com/hearthchain/burning-page/internal/store"
+	"github.com/hearthchain/genesis/internal/binding"
+	"github.com/hearthchain/genesis/internal/hearthaddr"
+	"github.com/hearthchain/genesis/internal/store"
 )
 
 // formatEosMemo marks a binding proven by an on-chain transfer memo; only
