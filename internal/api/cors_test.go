@@ -18,7 +18,7 @@ import (
 	"github.com/hearthchain/burning-page/internal/journal"
 )
 
-const pagesOrigin = "https://genesis.hearth.tech"
+const pagesOrigin = "https://hearth.tech"
 
 // corsServer is a bare server with no artifacts: CORS behavior is independent
 // of the data underneath.

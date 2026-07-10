@@ -1,7 +1,7 @@
 "use strict";
 // Compiled to web/assets/js/config.js by `make web`. Never edit the compiled file.
 // The only deployment knob of the static site: where the burn API lives.
-// Empty string means same-origin (genesis.hearth.tech/api behind one proxy).
+// Empty string means same-origin (the site and /api behind one proxy).
 // On localhost the API is assumed on :8080 (cmd/api's default listenAddr);
 // localStorage.setItem("hearthApiBase", ...) still overrides everything.
 (function () {

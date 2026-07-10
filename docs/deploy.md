@@ -43,7 +43,7 @@ Then `systemctl daemon-reload && systemctl enable --now hearth-api hearth-watche
 
 ## Operator-managed files (never deployed by the workflow)
 
-- `/opt/hearth/config.json`: production values: per-chain `chains` blocks with real `window`s (waves `confirmations: 100`, eos `0`), `allowedOrigins: ["https://genesis.hearth.tech"]`, `dataDir: "data"`. Start from `config.example.json`.
+- `/opt/hearth/config.json`: production values: per-chain `chains` blocks with real `window`s (waves `confirmations: 100`, eos `0`), `allowedOrigins: ["https://hearth.tech"]`, `dataDir: "data"`. Start from `config.example.json`.
 - `/opt/hearth/data/journal/{waves,eos}.csv`: copy once (`make journal` locally, then scp); refresh when the price journals update.
 - `/opt/hearth/data/*.jsonl`: the entire state; back it up by cron. Never seed it from a dev machine that ran with `confirmations: 0`.
 

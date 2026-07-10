@@ -1,10 +1,10 @@
 ---
-purpose: genesis.hearth.tech application, burn-window web app plus backend pipeline (watchers, credit engine, snapshot builder)
+purpose: Genesis burn application, burn-window web app plus backend pipeline (watchers, credit engine, snapshot builder)
 ---
 
 # burning-page
 
-The genesis burn application for Hearth (HRTH). Users provably burn tokens of ten faded L1 chains during the genesis window and receive HRTH credits, one credit per HRTH token at network launch. This repo holds everything behind genesis.hearth.tech: the static web frontend and the Go backend pipeline that detects burns, computes credits, and builds the genesis snapshot. Mechanics, user path, chain table, and open questions live in the spec: [`hearthchain/strategy/genesis-burn-tz.md`](../strategy/genesis-burn-tz.md).
+The genesis burn application for Hearth (HRTH). Users provably burn tokens of ten faded L1 chains during the genesis window and receive HRTH credits, one credit per HRTH token at network launch. This repo holds the whole genesis burn application: the static web frontend and the Go backend pipeline that detects burns, computes credits, and builds the genesis snapshot. Mechanics, user path, chain table, and open questions live in the spec: [`hearthchain/strategy/genesis-burn-tz.md`](../strategy/genesis-burn-tz.md).
 
 The backend is a cache, never an authority: every number is recomputable from public chain data plus published artifacts (burn spec, price journal, snapshot with Merkle root and reproduction script).
 
@@ -42,7 +42,7 @@ Milestones 1-3 are specified in [`docs/architecture.md`](docs/architecture.md). 
 
 ## Deploying the site
 
-`.github/workflows/pages.yml` deploys `web/` to GitHub Pages on every push to `main` that touches `web/**` (plus manual dispatch). One-time repo settings, not covered by the workflow: set the custom domain `genesis.hearth.tech` in Settings → Pages (with Actions deploys the `web/CNAME` file alone does not apply it), allow `develop` in the `github-pages` environment's deployment-branch rules, and point DNS (`genesis` CNAME to `hearthchain.github.io`) when going live; HTTPS provisions only after DNS resolves. The frontend's API base is the single constant in `web/assets/js/config.js` (empty = same-origin `/api`); until the API is publicly hosted the site degrades to placeholders gracefully.
+`.github/workflows/pages.yml` deploys `web/` to GitHub Pages on every push to `main` that touches `web/**` (plus manual dispatch). The site is a project page under the organization's domain, so it is served at `hearth.tech/<repo-name>/` with no DNS of its own; the one-time repo settings are the Pages build type (GitHub Actions) and the `github-pages` environment's deployment-branch rules. The frontend's API base is the single constant in `web/assets/js/config.js` (empty = same-origin `/api`); until the API is publicly hosted the site degrades to placeholders gracefully.
 
 ## Development
 

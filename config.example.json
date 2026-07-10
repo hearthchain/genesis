@@ -31,5 +31,5 @@
   "dataDir": "data",
   "listenAddr": ":8080",
   "hearthScheme": "H",
-  "allowedOrigins": ["https://genesis.hearth.tech"]
+  "allowedOrigins": ["https://hearth.tech"]
 }
